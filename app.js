@@ -585,14 +585,31 @@
   }
 
   // ---------- Rendering ----------
+  // Tipo di parcheggio per il menu dei tipi da mostrare
+  const TIPI_COPERTI = ["multi-storey", "underground", "rooftop"];
+  const TIPI_GARAGE = ["carports", "garage_boxes"];
+  function tipoLuogo(l) {
+    if (l.fonte === "opendata" || l.categoria === "tempo-reale") return "reale";
+    if (l.categoria === "strada") return "strada";
+    const p = (l.tags && l.tags.parking) || "";
+    if (l.categoria === "stallo") return (l.disabili > 0 || (l.tags && l.tags.parking_space === "disabled")) ? "disabili" : "strada";
+    if (TIPI_COPERTI.includes(p)) return "multipiano";
+    if (TIPI_GARAGE.includes(p)) return "garage";
+    if (p === "street_side" || p === "lane") return "strada";
+    if (!p && l.coperto) return "multipiano";
+    return "aperto";
+  }
+  // Si vede se il suo tipo è spuntato e anche la sua tariffa; con la tariffa non indicata
+  // basta che almeno una delle due tariffe sia spuntata.
   function passaFiltri(l) {
-    const f = stato.filtri;
-    if (f.has("gratuito") && l.tariffa !== "gratuito") return false;
-    if (f.has("disabili") && !(l.disabili > 0)) return false;
-    if (f.has("coperto") && !l.coperto) return false;
-    if (f.has("strada") && l.categoria !== "strada" && l.categoria !== "stallo") return false;
-    if (f.has("ztl") && zonaChiusa(zonaLuogo(l))) return false;
-    return true;
+    const tolti = stato.filtri;
+    const tipo = tipoLuogo(l);
+    if (tolti.has(tipo)) return false;
+    if (tolti.has("ztl") && zonaChiusa(zonaLuogo(l))) return false;
+    if (tipo === "reale") return true;
+    if (l.tariffa === "gratuito") return !tolti.has("gratuito");
+    if (l.tariffa === "pagamento") return !tolti.has("pagamento");
+    return !(tolti.has("gratuito") && tolti.has("pagamento"));
   }
 
   // Forma e colore del segnaposto:
@@ -601,8 +618,10 @@
   //   rettangolo blu (largo il doppio) con il numero dei posti = più di 6 posti
   function coloreLuogo(l) {
     if (l.fonte === "opendata") return l.liberi > 0 ? "verde" : "pieno";
-    if (l.capienza == null || l.capienza <= 6) return "blu";
-    return "blu largo";
+    // il colore dice il tipo di parcheggio (vedi il menu dei tipi), la forma i posti
+    const tipo = "t-" + tipoLuogo(l);
+    if (l.capienza == null || l.capienza <= 6) return tipo;
+    return tipo + " largo";
   }
   function testoLuogo(l) {
     if (l.fonte === "opendata") return String(l.liberi);
@@ -675,11 +694,11 @@
 
     const osm = stato.osm.filter(passaFiltri);
     const reale = stato.reale.filter(passaFiltri);
-    const segnVisibili = stato.filtri.size ? [] : stato.segn;
+    const segnVisibili = stato.filtri.has("reale") ? [] : stato.segn;
 
     // Strade con sosta
     for (const l of osm.filter((x) => x.categoria === "strada")) {
-      const linea = L.polyline(l.geom.map((p) => [p.lat, p.lon]), { color: "#1b4f9c", weight: 6, opacity: .55 })
+      const linea = L.polyline(l.geom.map((p) => [p.lat, p.lon]), { color: getComputedStyle(document.documentElement).getPropertyValue("--t-strada").trim() || "#a8541a", weight: 6, opacity: .7 })
         .bindPopup(popupLuogo(l), OPZ_POPUP).addTo(livelli.strade);
       markerPerId.set(l.id, linea);
       // segnaposto con il numero di posti a metà della strada (visibile da zoom 18)
@@ -786,10 +805,11 @@
           l.capienza ? `<span>${l.capienza} posti</span>` : "", tagZona(l)]
       }) });
     }
-    const mostraStalli = stato.filtri.has("disabili") || stato.filtri.has("strada");
+    // Nell'elenco gli stalli singoli compaiono solo quelli per disabili (gli altri sono troppi)
+    const mostraStalli = (l) => tipoLuogo(l) === "disabili";
     for (const l of osm) {
       if (l.categoria === "ingresso") continue;
-      if (l.categoria === "stallo" && !mostraStalli) continue;
+      if (l.categoria === "stallo" && !mostraStalli(l)) continue;
       const meta = [`<span>${esc(l.tipo)}</span>`];
       if (l.capienza) meta.push(`<span>${l.capienzaStimata ? "~" : ""}${l.capienza} posti</span>`);
       if (l.tariffa === "gratuito") meta.push('<span class="tag gratis">Gratuito</span>');
@@ -807,7 +827,7 @@
       const li = document.createElement("li");
       li.className = "vuoto";
       li.textContent = stato.filtri.size
-        ? "Nessun risultato con questi filtri. Prova a toglierne uno o ad allargare il raggio."
+        ? "Nessun parcheggio dei tipi scelti. Rimetti qualche spunta nel menu in alto o allarga il raggio."
         : "Nessuna area di sosta mappata qui. Prova ad allargare il raggio.";
       ol.appendChild(li);
       return;
@@ -918,13 +938,39 @@
       carica();
     }
   });
-  document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-    const f = c.dataset.filtro;
-    const on = !stato.filtri.has(f);
-    on ? stato.filtri.add(f) : stato.filtri.delete(f);
-    c.setAttribute("aria-pressed", String(on));
+  // ---------- Tipi di parcheggio da mostrare: menu a discesa a scelte multiple nella barra in alto ----------
+  // stato.filtri contiene le voci TOLTE (senza spunta). All'inizio sono tutte spuntate tranne
+  // "Dentro le ZTL" (i parcheggi raggiungibili solo con il contrassegno partono nascosti).
+  const caselleFiltri = [...document.querySelectorAll("#filtri-lista input[data-voce]")];
+  const INIZIALE = new Map(caselleFiltri.map((c) => [c.dataset.voce, c.checked]));
+  function aggiornaFiltri() {
+    stato.filtri = new Set(caselleFiltri.filter((c) => !c.checked).map((c) => c.dataset.voce));
+    const n = caselleFiltri.filter((c) => c.checked !== INIZIALE.get(c.dataset.voce)).length;
+    $("filtri-num").textContent = n;
+    $("filtri-num").hidden = n === 0;
+    $("btn-filtri").classList.toggle("attivi", n > 0);
+    $("filtri-azzera").disabled = n === 0;
+    try { localStorage.setItem("postolibero.tipi", [...stato.filtri].join(",")); } catch (e) { /* ignora */ }
     render();
-  }));
+  }
+  function apriFiltri(apri) {
+    $("filtri-lista").hidden = !apri;
+    $("btn-filtri").setAttribute("aria-expanded", String(apri));
+  }
+  try {
+    const salvato = localStorage.getItem("postolibero.tipi");
+    if (salvato !== null) {
+      const tolti = salvato.split(",");
+      caselleFiltri.forEach((c) => { c.checked = !tolti.includes(c.dataset.voce); });
+    }
+    localStorage.removeItem("postolibero.filtri");   // vecchi filtri a esclusione
+  } catch (e) { /* ignora */ }
+  caselleFiltri.forEach((c) => c.addEventListener("change", aggiornaFiltri));
+  $("btn-filtri").addEventListener("click", (e) => { e.stopPropagation(); apriFiltri($("filtri-lista").hidden); });
+  $("filtri-azzera").addEventListener("click", () => { caselleFiltri.forEach((c) => { c.checked = INIZIALE.get(c.dataset.voce); }); aggiornaFiltri(); });
+  // si chiude toccando fuori dal menu
+  document.addEventListener("pointerdown", (e) => { if (!$("filtri-menu").contains(e.target)) apriFiltri(false); });
+  aggiornaFiltri();
   function apriElenco() {
     $("pannello").hidden = false;
     $("btn-elenco").setAttribute("aria-expanded", "true");
@@ -972,7 +1018,11 @@
     if (dest) dest.scrollIntoView({ behavior: "smooth", block: "start" });
   }));
   $("guida-versione").textContent = "Versione " + (cfg.versione || "");
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !chiudiGuida()) chiudiElenco(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (!$("filtri-lista").hidden) { apriFiltri(false); return; }
+    if (!chiudiGuida()) chiudiElenco();
+  });
 
   // ---------- Lettura vocale dei riquadri ----------
   let letturaAttiva = true;

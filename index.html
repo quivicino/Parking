@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="style.css?v=36">
 </head>
 <body>
   <div class="app">
@@ -26,6 +26,28 @@
         <label for="cerca-indirizzo" class="sr-only">Cerca un indirizzo</label>
         <input id="cerca-indirizzo" type="search" placeholder="Cerca un indirizzo…" autocomplete="off" enterkeyhint="search">
       </form>
+      <div class="filtri-menu" id="filtri-menu">
+        <button class="filtri-btn" id="btn-filtri" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="filtri-lista" title="Filtri">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.6V19l-4 2v-8.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span class="sr-only">Filtri</span>
+          <span class="filtri-num" id="filtri-num" hidden></span>
+        </button>
+        <div class="filtri-lista" id="filtri-lista" role="group" aria-label="Filtri" hidden>
+          <p class="filtri-titolo">Mostra <small>(togli la spunta per nascondere)</small></p>
+          <label><input type="checkbox" data-voce="aperto" checked><i class="pallino t-aperto" aria-hidden="true"></i><span>Aree di sosta all'aperto</span></label>
+          <label><input type="checkbox" data-voce="multipiano" checked><i class="pallino t-multipiano" aria-hidden="true"></i><span>Multipiano e interrati</span></label>
+          <label><input type="checkbox" data-voce="garage" checked><i class="pallino t-garage" aria-hidden="true"></i><span>Garage e posti coperti</span></label>
+          <label><input type="checkbox" data-voce="strada" checked><i class="pallino t-strada" aria-hidden="true"></i><span>Sosta su strada</span></label>
+          <label><input type="checkbox" data-voce="disabili" checked><i class="pallino t-disabili" aria-hidden="true"></i><span>Stalli per disabili</span></label>
+          <label><input type="checkbox" data-voce="reale" checked><i class="pallino t-reale" aria-hidden="true"></i><span>Posti liberi segnalati e in tempo reale</span></label>
+          <p class="filtri-titolo filtri-sezione">Tariffa</p>
+          <label><input type="checkbox" data-voce="gratuito" checked><span>Gratuiti</span></label>
+          <label><input type="checkbox" data-voce="pagamento" checked><span>A pagamento</span></label>
+          <p class="filtri-titolo filtri-sezione">Zone</p>
+          <label><input type="checkbox" data-voce="ztl"><i class="tag-ztl" aria-hidden="true">ZTL</i><span>Dentro le ZTL e le aree pedonali <small>(solo con contrassegno)</small></span></label>
+          <button class="filtri-azzera" id="filtri-azzera" type="button">Torna alle scelte iniziali</button>
+        </div>
+      </div>
       <label class="raggio">
         <span class="sr-only">Raggio</span>
         <select id="raggio">
@@ -127,14 +149,6 @@
           <div class="kpi kpi-osm"><b id="k-osm">–</b><span>aree di sosta<br>in zona</span></div>
         </div>
 
-        <div class="filtri" role="group" aria-label="Filtri">
-          <button class="chip" type="button" data-filtro="gratuito" aria-pressed="false">Gratuiti</button>
-          <button class="chip" type="button" data-filtro="disabili" aria-pressed="false">Disabili</button>
-          <button class="chip" type="button" data-filtro="coperto" aria-pressed="false">Coperti</button>
-          <button class="chip" type="button" data-filtro="strada" aria-pressed="false">Su strada</button>
-          <button class="chip" type="button" data-filtro="ztl" aria-pressed="false">Senza ZTL</button>
-        </div>
-
         <ol class="lista" id="lista"></ol>
 
         <footer class="fonti">
@@ -170,15 +184,16 @@
           <ul class="g-lista">
             <li><span class="g-segno"><span class="mk reale verde">42</span></span><div><b>Quadrato verde con numero</b>: parcheggio con posti liberi <i>adesso</i>; il numero dice quanti.</div></li>
             <li><span class="g-segno"><span class="mk reale pieno">0</span></span><div><b>Rosso con 0</b>: parcheggio pieno in questo momento.</div></li>
-            <li><span class="g-segno"><span class="mk blu">4</span></span><div><b>Quadrato blu con numero</b>: parcheggio piccolo, da 1 a 6 posti in tutto.</div></li>
-            <li><span class="g-segno"><span class="mk blu largo">120</span></span><div><b>Rettangolo blu con numero</b>: parcheggio con più di 6 posti in tutto.</div></li>
-            <li><span class="g-segno"><span class="mk blu">N</span></span><div><b>Quadrato blu con N</b>: parcheggio di cui non si sa quanti posti ha.</div></li>
-            <li><span class="g-segno"><span class="mk blu largo">40</span></span><div><b>Numero stimato</b>: se la mappa non dice quanti posti ci sono, l'app li stima dalla superficie dell'area di sosta (circa 25 m² per auto) o dalla lunghezza della strada. Nel riquadro compare "circa", nell'elenco il segno ~. La stima può sbagliare anche di un terzo.</div></li>
+            <li><span class="g-segno"><span class="mk t-aperto">4</span></span><div><b>Quadrato con numero</b>: parcheggio piccolo, da 1 a 6 posti in tutto.</div></li>
+            <li><span class="g-segno"><span class="mk t-multipiano largo">120</span></span><div><b>Rettangolo con numero</b>: parcheggio con più di 6 posti in tutto.</div></li>
+            <li><span class="g-segno"><span class="mk t-aperto">N</span></span><div><b>Quadrato con N</b>: parcheggio di cui non si sa quanti posti ha.</div></li>
+            <li><span class="g-segno"><span class="mk t-garage">8</span></span><div><b>Il colore dice il tipo</b> (come i pallini nel menu dei tipi):<span class="g-colori"><span><i class="pallino t-aperto"></i>blu: all'aperto</span><span><i class="pallino t-multipiano"></i>viola: multipiano e interrati</span><span><i class="pallino t-garage"></i>verde petrolio: garage e posti coperti</span><span><i class="pallino t-strada"></i>marrone: sosta su strada</span><span><i class="pallino t-disabili"></i>rosa: stalli per disabili</span><span><i class="pallino t-reale"></i>verde: posti liberi adesso</span></span></div></li>
+            <li><span class="g-segno"><span class="mk t-aperto largo">40</span></span><div><b>Numero stimato</b>: se la mappa non dice quanti posti ci sono, l'app li stima dalla superficie dell'area di sosta (circa 25 m² per auto) o dalla lunghezza della strada. Nel riquadro compare "circa", nell'elenco il segno ~. La stima può sbagliare anche di un terzo.</div></li>
             <li><span class="g-segno"><span class="segn-box"><span class="mk segn libero"></span><span class="segn-eta">5 min</span></span></span><div><b>Pallino verde</b>: posto libero segnalato da un utente; accanto, da quanti minuti. Sparisce dopo 2 ore.</div></li>
             <li><span class="g-segno"><span class="mk segn occupato"></span></span><div><b>Pallino rosso</b>: qualcuno ha appena parcheggiato lì.</div></li>
-            <li><span class="g-segno"><span class="g-linea"></span></span><div><b>Linea blu lungo una strada</b>: tratto di strada dove si può sostare. Avvicinando molto la mappa compare a metà della linea un segnaposto con il numero stimato di posti.</div></li>
+            <li><span class="g-segno"><span class="g-linea"></span></span><div><b>Linea marrone lungo una strada</b>: tratto di strada dove si può sostare. Avvicinando molto la mappa compare a metà della linea un segnaposto con il numero stimato di posti.</div></li>
             <li><span class="g-segno"><span class="g-area"></span></span><div><b>Area rossa</b>: Zona a Traffico Limitato o area pedonale. Si entra solo con il contrassegno (residenti, autorizzati, disabili…). Toccala per vedere di che zona si tratta.</div></li>
-            <li><span class="g-segno"><span class="mk blu largo in-ztl">25</span></span><div><b>Etichetta rossa "ZTL"</b> sul segnaposto: il parcheggio è dentro una ZTL, raggiungibile solo con contrassegno.</div></li>
+            <li><span class="g-segno"><span class="mk t-aperto largo in-ztl">25</span></span><div><b>Etichetta rossa "ZTL"</b> sul segnaposto: il parcheggio è dentro una ZTL, raggiungibile solo con contrassegno.</div></li>
             <li><span class="g-segno"><span class="g-area c"></span></span><div><b>Bordo arancione tratteggiato</b> (Milano): Area C. Si entra pagando il ticket; i parcheggi dentro hanno l'etichetta arancione "C".</div></li>
             <li><span class="g-segno"><span class="mk varco"></span></span><div><b>Pallino rosso con centro bianco</b>: varco con telecamera all'ingresso della ZTL (visibile avvicinando la mappa).</div></li>
             <li><span class="g-segno"><span class="io"></span></span><div><b>Punto azzurro</b>: sei tu. Il <b>cono azzurro</b> mostra dove è rivolto il telefono (su iPhone tocca il pulsante della posizione e consenti <i>Movimento e orientamento</i>). Il <b>cerchio tratteggiato</b> è il raggio di ricerca.</div></li>
@@ -192,6 +207,7 @@
           <h3>I pulsanti</h3>
           <ul class="g-lista">
             <li><span class="g-segno"><span class="g-barra">Cerca un indirizzo…</span></span><div><b>Cerca</b>: scrivi una via o una piazza per vedere i parcheggi lì invece che intorno a te.</div></li>
+            <li><span class="g-segno"><span class="g-fab"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.6V19l-4 2v-8.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span></span><div><b>Tipi di parcheggio</b> (imbuto in alto, accanto al raggio): apre un menu con i tipi da mostrare, tutti spuntati all'inizio: aree di sosta all'aperto, multipiano e interrati, garage e posti coperti, sosta su strada, stalli per disabili, posti liberi segnalati e in tempo reale; sotto, la tariffa: gratuiti e a pagamento. Togli la spunta a quello che non ti interessa (anche più voci insieme): un parcheggio si vede se il suo tipo e la sua tariffa sono spuntati; quelli con tariffa non indicata si vedono finché almeno una delle due tariffe è spuntata. In fondo c'è <b>Dentro le ZTL e le aree pedonali</b>: all'inizio è senza spunta, quindi i parcheggi raggiungibili solo con il contrassegno non si vedono; spuntala se ce l'hai. Il numerino arancione dice quante voci hai cambiato rispetto all'inizio; <b>Torna alle scelte iniziali</b> rimette tutto com'era.</div></li>
             <li><span class="g-segno"><span class="g-barra corto">1 km</span></span><div><b>Raggio</b>: quanto lontano cercare, 200 m, 500 m, 1 km o 2 km.</div></li>
             <li><span class="g-segno"><span class="g-fab"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></span></span><div><b>Posizione</b>: riporta la mappa su di te e la fa seguire mentre ti sposti.</div></li>
             <li><span class="g-segno"><span class="g-fab nero"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="4.5" cy="6" r="1.6" fill="currentColor"/><circle cx="4.5" cy="12" r="1.6" fill="currentColor"/><circle cx="4.5" cy="18" r="1.6" fill="currentColor"/></svg></span></span><div><b>Elenco</b>: apre la pagina con tutti i posti vicini e le impostazioni. Il numerino verde indica quanti posti sono sicuramente liberi.</div></li>
@@ -223,7 +239,7 @@
             <dd>Quando tocchi un segnaposto, l'app legge ad alta voce il riquadro.</dd>
           </dl>
           <p>Sotto trovi tre numeri riassuntivi (posti liberi nei parcheggi, posti segnalati liberi, aree di sosta in zona),
-            i <b>filtri</b> Gratuiti, Disabili, Coperti, Su strada, Senza ZTL (toglie i parcheggi dentro ZTL e aree pedonali), e l'<b>elenco</b>: prima i posti sicuramente liberi, poi gli altri dal più vicino.
+            e l'<b>elenco</b>: prima i posti sicuramente liberi, poi gli altri dal più vicino. I tipi scelti sulla mappa valgono anche qui.
             Tocca una riga per vederla sulla mappa.</p>
           <p>Le scelte restano memorizzate sul telefono.</p>
         </section>
@@ -275,7 +291,7 @@
   <script src="config.js?v=35"></script>
   <script src="core.js?v=35"></script>
   <script src="segnalazioni.js?v=34"></script>
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=36"></script>
   <script src="installa.js?v=35"></script>
   <script src="bussola.js?v=35"></script>
   <!-- Statistiche d'uso anonime, senza cookie: https://parcheggi.goatcounter.com

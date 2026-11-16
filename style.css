@@ -19,6 +19,12 @@
   --r: 14px;
   --su-colore: #ffffff;
   --barra: #1b4f9c;
+  /* colori dei segnaposto per tipo di parcheggio */
+  --t-aperto: #1b4f9c;
+  --t-multipiano: #6a3aa8;
+  --t-garage: #0d7377;
+  --t-strada: #a8541a;
+  --t-disabili: #b0306f;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -38,6 +44,11 @@
     --ombra: 0 6px 24px rgba(0, 0, 0, .45);
     --su-colore: #0c1220;
     --barra: #19386a;
+    --t-aperto: #4f86dc;
+    --t-multipiano: #9a72d6;
+    --t-garage: #2fa8a6;
+    --t-strada: #d98545;
+    --t-disabili: #e0679f;
     color-scheme: dark;
   }
   .mappa:not(.satellite) .leaflet-tile-pane { filter: brightness(.72) contrast(1.1) saturate(.7); }
@@ -221,6 +232,42 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn:disabled { opacity: .5; cursor: default; }
 
 .filtri { display: flex; gap: 6px; flex-wrap: wrap; }
+/* Menu a discesa dei filtri, nella barra in alto (scelte multiple) */
+.filtri-menu { position: relative; flex: none; }
+.filtri-btn {
+  position: relative; width: 42px; height: 38px; border: 0; border-radius: 10px;
+  display: grid; place-items: center; background: rgba(255,255,255,.16); color: #fff;
+}
+.filtri-btn[aria-expanded="true"], .filtri-btn.attivi { background: #fff; color: var(--blu); }
+.filtri-num {
+  position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
+  background: var(--attenzione); color: #fff; border: 2px solid var(--barra);
+  font: 700 11px/14px var(--font-body); text-align: center;
+}
+.filtri-lista {
+  position: absolute; top: calc(100% + 10px); right: -60px; z-index: 1300;
+  width: 290px; max-height: calc(100vh - 120px); overflow-y: auto; padding: 8px; border-radius: 14px;
+  background: var(--superficie); color: var(--testo); box-shadow: var(--ombra); border: 1px solid var(--bordo);
+}
+.filtri-titolo { margin: 4px 8px 6px; font: 700 15px/1.2 var(--font-display); letter-spacing: .04em; }
+.filtri-sezione { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bordo); }
+.filtri-titolo small { font: 400 12px var(--font-body); letter-spacing: 0; color: var(--testo-2); }
+.filtri-lista label {
+  display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 8px; border-radius: 10px;
+  font: 500 16px/1.2 var(--font-body); cursor: pointer;
+}
+.filtri-lista label:hover { background: var(--bg); }
+.filtri-lista input { width: 22px; height: 22px; accent-color: var(--blu); flex: none; }
+.filtri-azzera {
+  width: 100%; margin-top: 6px; min-height: 42px; border: 0; border-top: 1px solid var(--bordo);
+  background: none; color: var(--blu); font: 600 15px var(--font-body);
+}
+.filtri-lista label small { font-size: 13px; color: var(--testo-2); }
+.tag-ztl {
+  flex: none; padding: 1px 4px; border-radius: 4px; background: var(--pieno); color: #fff;
+  font: 700 10px/1.2 var(--font-body); font-style: normal;
+}
+.filtri-azzera:disabled { color: var(--testo-2); opacity: .6; }
 .chip {
   border: 1px solid var(--bordo); background: transparent;
   border-radius: 999px; padding: 5px 12px; font-size: 13.5px; font-weight: 500;
@@ -347,7 +394,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .g-lista li > div { min-width: 0; }
 .g-segno { display: flex; justify-content: center; align-items: center; min-height: 32px; }
 .g-segno .mk { position: relative; }
-.g-linea { display: block; width: 64px; height: 6px; border-radius: 3px; background: #1b4f9c; opacity: .6; }
+.g-linea { display: block; width: 64px; height: 6px; border-radius: 3px; background: var(--t-strada); opacity: .75; }
 .g-barra {
   display: block; max-width: 96px; padding: 6px 8px; border-radius: 8px; background: var(--barra); color: #fff;
   font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -420,3 +467,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .installa-dopo { border: 2px solid var(--bordo); background: var(--superficie); color: var(--testo-2); }
 .installa-ok { border: 0; background: var(--blu); color: var(--su-colore); }
 @media (prefers-reduced-motion: reduce) { .installa { animation: none; } }
+
+/* Colore del segnaposto secondo il tipo di parcheggio (stesso colore del pallino nel menu) */
+.mk.t-aperto, .icona.t-aperto, .pallino.t-aperto { background: var(--t-aperto); }
+.mk.t-multipiano, .icona.t-multipiano, .pallino.t-multipiano { background: var(--t-multipiano); }
+.mk.t-garage, .icona.t-garage, .pallino.t-garage { background: var(--t-garage); }
+.mk.t-strada, .icona.t-strada, .pallino.t-strada { background: var(--t-strada); }
+.mk.t-disabili, .icona.t-disabili, .pallino.t-disabili { background: var(--t-disabili); }
+.pallino.t-reale { background: var(--libero); }
+.pallino { flex: none; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--bordo); }
+.g-colori { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; font-size: 14px; }
+.g-colori span { display: inline-flex; align-items: center; gap: 6px; }
