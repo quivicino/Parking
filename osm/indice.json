@@ -15,7 +15,7 @@
     13.0331
    ],
    "cartella": "italia-35n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 10,
    "tessere": [
     "t_1775_627.json",
@@ -40,7 +40,7 @@
     12.0335
    ],
    "cartella": "italia-36n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 75,
    "tessere": [
     "t_1836_601.json",
@@ -81,7 +81,7 @@
     13.0335
    ],
    "cartella": "italia-36n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 39,
    "tessere": [
     "t_1836_601.json",
@@ -119,7 +119,7 @@
     15.0335
    ],
    "cartella": "italia-36n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 3193,
    "tessere": [
     "t_1834_748.json",
@@ -284,7 +284,7 @@
     16.0335
    ],
    "cartella": "italia-36n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1880,
    "tessere": [
     "t_1832_753.json",
@@ -378,7 +378,7 @@
     13.034
    ],
    "cartella": "italia-37n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 583,
    "tessere": [
     "t_1875_650.json",
@@ -547,8 +547,8 @@
     14.034
    ],
    "cartella": "italia-37n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 950,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 944,
    "tessere": [
     "t_1854_696.json",
     "t_1854_697.json",
@@ -836,8 +836,8 @@
     15.034
    ],
    "cartella": "italia-37n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 9565,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 9561,
    "tessere": [
     "t_1848_738.json",
     "t_1848_741.json",
@@ -1235,8 +1235,8 @@
     16.034
    ],
    "cartella": "italia-37n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 33679,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 34219,
    "tessere": [
     "t_1848_753.json",
     "t_1848_754.json",
@@ -1589,7 +1589,7 @@
     17.034
    ],
    "cartella": "italia-37n-16e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 7,
    "tessere": [
     "t_1895_799.json",
@@ -1614,7 +1614,7 @@
     9.0344
    ],
    "cartella": "italia-38n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 265,
    "tessere": [
     "t_1944_439.json",
@@ -1677,7 +1677,7 @@
     10.0344
    ],
    "cartella": "italia-38n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 125,
    "tessere": [
     "t_1947_448.json",
@@ -1704,7 +1704,7 @@
     13.0344
    ],
    "cartella": "italia-38n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 320,
    "tessere": [
     "t_1898_630.json",
@@ -1796,8 +1796,8 @@
     14.0344
    ],
    "cartella": "italia-38n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 1082,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 1086,
    "tessere": [
     "t_1898_648.json",
     "t_1898_662.json",
@@ -1937,6 +1937,7 @@
     "t_1910_665.json",
     "t_1910_666.json",
     "t_1934_657.json",
+    "t_1935_658.json",
     "t_1935_659.json"
    ]
   },
@@ -1954,7 +1955,7 @@
     15.0344
    ],
    "cartella": "italia-38n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 452,
    "tessere": [
     "t_1898_700.json",
@@ -2076,7 +2077,7 @@
     16.0344
    ],
    "cartella": "italia-38n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1869,
    "tessere": [
     "t_1898_762.json",
@@ -2357,7 +2358,7 @@
     17.0344
    ],
    "cartella": "italia-38n-16e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 2438,
    "tessere": [
     "t_1899_800.json",
@@ -2738,7 +2739,7 @@
     18.0344
    ],
    "cartella": "italia-38n-17e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 71,
    "tessere": [
     "t_1944_854.json",
@@ -2782,8 +2783,8 @@
     9.0349
    ],
    "cartella": "italia-39n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 6012,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 6472,
    "tessere": [
     "t_1948_448.json",
     "t_1949_419.json",
@@ -3171,8 +3172,8 @@
     10.0349
    ],
    "cartella": "italia-39n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 4919,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 6621,
    "tessere": [
     "t_1948_448.json",
     "t_1949_449.json",
@@ -3332,6 +3333,7 @@
     "t_1969_454.json",
     "t_1969_458.json",
     "t_1969_459.json",
+    "t_1969_476.json",
     "t_1969_480.json",
     "t_1970_452.json",
     "t_1970_477.json",
@@ -3530,8 +3532,8 @@
     16.0349
    ],
    "cartella": "italia-39n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 582,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 584,
    "tessere": [
     "t_1967_801.json",
     "t_1968_801.json",
@@ -3640,7 +3642,7 @@
     17.0349
    ],
    "cartella": "italia-39n-16e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1753,
    "tessere": [
     "t_1948_807.json",
@@ -4015,7 +4017,7 @@
     18.0349
    ],
    "cartella": "italia-39n-17e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 504,
    "tessere": [
     "t_1948_853.json",
@@ -4098,7 +4100,7 @@
     19.0349
    ],
    "cartella": "italia-39n-18e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 714,
    "tessere": [
     "t_1989_916.json",
@@ -4216,8 +4218,8 @@
     9.0354
    ],
    "cartella": "italia-40n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 5259,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 5397,
    "tessere": [
     "t_1998_427.json",
     "t_1999_426.json",
@@ -4287,6 +4289,7 @@
     "t_2010_440.json",
     "t_2011_427.json",
     "t_2011_430.json",
+    "t_2011_438.json",
     "t_2011_439.json",
     "t_2011_445.json",
     "t_2012_423.json",
@@ -4567,8 +4570,8 @@
     10.0354
    ],
    "cartella": "italia-40n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 9464,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 10329,
    "tessere": [
     "t_1998_483.json",
     "t_1998_484.json",
@@ -4634,6 +4637,7 @@
     "t_2008_481.json",
     "t_2009_457.json",
     "t_2009_476.json",
+    "t_2010_454.json",
     "t_2010_463.json",
     "t_2010_464.json",
     "t_2010_466.json",
@@ -4658,6 +4662,7 @@
     "t_2013_480.json",
     "t_2013_481.json",
     "t_2014_450.json",
+    "t_2014_463.json",
     "t_2014_469.json",
     "t_2014_470.json",
     "t_2014_474.json",
@@ -4686,6 +4691,7 @@
     "t_2016_483.json",
     "t_2017_450.json",
     "t_2017_484.json",
+    "t_2018_470.json",
     "t_2018_475.json",
     "t_2018_480.json",
     "t_2018_481.json",
@@ -4727,6 +4733,7 @@
     "t_2024_490.json",
     "t_2026_466.json",
     "t_2026_479.json",
+    "t_2026_482.json",
     "t_2026_483.json",
     "t_2026_489.json",
     "t_2026_490.json",
@@ -4904,7 +4911,7 @@
     13.0354
    ],
    "cartella": "italia-40n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 41,
    "tessere": [
     "t_2044_647.json",
@@ -4929,7 +4936,7 @@
     14.0354
    ],
    "cartella": "italia-40n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 319,
    "tessere": [
     "t_2034_694.json",
@@ -4982,8 +4989,8 @@
     15.0354
    ],
    "cartella": "italia-40n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 8582,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 8581,
    "tessere": [
     "t_2008_751.json",
     "t_2009_750.json",
@@ -5602,8 +5609,8 @@
     16.0354
    ],
    "cartella": "italia-40n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 2660,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 2661,
    "tessere": [
     "t_1999_768.json",
     "t_1999_769.json",
@@ -6158,8 +6165,8 @@
     17.0354
    ],
    "cartella": "italia-40n-16e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 1534,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 1535,
    "tessere": [
     "t_1998_804.json",
     "t_1998_808.json",
@@ -6341,6 +6348,7 @@
     "t_2029_809.json",
     "t_2029_812.json",
     "t_2029_819.json",
+    "t_2029_826.json",
     "t_2029_837.json",
     "t_2030_807.json",
     "t_2030_818.json",
@@ -6491,8 +6499,8 @@
     18.0354
    ],
    "cartella": "italia-40n-17e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 2839,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 2844,
    "tessere": [
     "t_1999_900.json",
     "t_1999_901.json",
@@ -6894,7 +6902,7 @@
     19.0354
    ],
    "cartella": "italia-40n-18e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 3753,
    "tessere": [
     "t_1998_904.json",
@@ -7170,7 +7178,7 @@
     9.036
    ],
    "cartella": "italia-41n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 83,
    "tessere": [
     "t_2048_443.json",
@@ -7208,7 +7216,7 @@
     10.036
    ],
    "cartella": "italia-41n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1497,
    "tessere": [
     "t_2048_478.json",
@@ -7354,8 +7362,8 @@
     13.036
    ],
    "cartella": "italia-41n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 15539,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 15775,
    "tessere": [
     "t_2063_651.json",
     "t_2064_650.json",
@@ -8054,7 +8062,7 @@
     14.036
    ],
    "cartella": "italia-41n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 2865,
    "tessere": [
     "t_2048_699.json",
@@ -8714,7 +8722,7 @@
     15.036
    ],
    "cartella": "italia-41n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 4070,
    "tessere": [
     "t_2048_699.json",
@@ -9599,7 +9607,7 @@
     16.036
    ],
    "cartella": "italia-41n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1541,
    "tessere": [
     "t_2048_751.json",
@@ -9869,8 +9877,8 @@
     17.036
    ],
    "cartella": "italia-41n-16e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 5523,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 5526,
    "tessere": [
     "t_2048_845.json",
     "t_2049_821.json",
@@ -10109,7 +10117,7 @@
     18.036
    ],
    "cartella": "italia-41n-17e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 274,
    "tessere": [
     "t_2048_854.json",
@@ -10155,7 +10163,7 @@
     11.0366
    ],
    "cartella": "italia-42n-10e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 2550,
    "tessere": [
     "t_2116_545.json",
@@ -10361,8 +10369,8 @@
     12.0366
    ],
    "cartella": "italia-42n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 2261,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 2272,
    "tessere": [
     "t_2098_601.json",
     "t_2099_600.json",
@@ -10692,6 +10700,7 @@
     "t_2144_601.json",
     "t_2145_549.json",
     "t_2145_566.json",
+    "t_2145_570.json",
     "t_2145_581.json",
     "t_2145_588.json",
     "t_2145_595.json",
@@ -10775,8 +10784,8 @@
     13.0366
    ],
    "cartella": "italia-42n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 6977,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 6984,
    "tessere": [
     "t_2098_601.json",
     "t_2098_602.json",
@@ -11764,8 +11773,8 @@
     14.0366
    ],
    "cartella": "italia-42n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 9406,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 9407,
    "tessere": [
     "t_2098_651.json",
     "t_2098_680.json",
@@ -12264,6 +12273,7 @@
     "t_2126_696.json",
     "t_2126_698.json",
     "t_2127_649.json",
+    "t_2127_661.json",
     "t_2127_668.json",
     "t_2127_669.json",
     "t_2127_673.json",
@@ -12631,8 +12641,8 @@
     15.0366
    ],
    "cartella": "italia-42n-14e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 23042,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 23046,
    "tessere": [
     "t_2098_698.json",
     "t_2098_706.json",
@@ -13121,7 +13131,7 @@
     16.0366
    ],
    "cartella": "italia-42n-15e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 212,
    "tessere": [
     "t_2098_749.json",
@@ -13148,7 +13158,7 @@
     8.0372
    ],
    "cartella": "italia-43n-7e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1842,
    "tessere": [
     "t_2188_382.json",
@@ -13296,7 +13306,7 @@
     9.0372
    ],
    "cartella": "italia-43n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 1460,
    "tessere": [
     "t_2192_398.json",
@@ -13372,7 +13382,7 @@
     10.0372
    ],
    "cartella": "italia-43n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 5,
    "tessere": [
     "t_2152_491.json",
@@ -13393,8 +13403,8 @@
     11.0372
    ],
    "cartella": "italia-43n-10e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 22266,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 22281,
    "tessere": [
     "t_2148_532.json",
     "t_2148_534.json",
@@ -14358,8 +14368,8 @@
     12.0372
    ],
    "cartella": "italia-43n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 19716,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 19710,
    "tessere": [
     "t_2148_564.json",
     "t_2148_565.json",
@@ -15520,8 +15530,8 @@
     13.0372
    ],
    "cartella": "italia-43n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 9995,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 10001,
    "tessere": [
     "t_2148_608.json",
     "t_2148_616.json",
@@ -16509,8 +16519,8 @@
     14.0372
    ],
    "cartella": "italia-43n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 8435,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 8439,
    "tessere": [
     "t_2148_667.json",
     "t_2148_692.json",
@@ -17126,7 +17136,7 @@
     7.0378
    ],
    "cartella": "italia-44n-6e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 255,
    "tessere": [
     "t_2214_350.json",
@@ -17217,8 +17227,8 @@
     8.0378
    ],
    "cartella": "italia-44n-7e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 10705,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 10712,
    "tessere": [
     "t_2198_397.json",
     "t_2198_398.json",
@@ -18358,8 +18368,8 @@
     9.0378
    ],
    "cartella": "italia-44n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 10959,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 10972,
    "tessere": [
     "t_2198_398.json",
     "t_2198_403.json",
@@ -18935,6 +18945,7 @@
     "t_2237_404.json",
     "t_2237_407.json",
     "t_2237_409.json",
+    "t_2237_410.json",
     "t_2237_411.json",
     "t_2237_414.json",
     "t_2237_417.json",
@@ -19254,6 +19265,7 @@
     "t_2250_399.json",
     "t_2250_400.json",
     "t_2250_402.json",
+    "t_2250_403.json",
     "t_2250_404.json",
     "t_2250_405.json",
     "t_2250_408.json",
@@ -19309,8 +19321,8 @@
     10.0378
    ],
    "cartella": "italia-44n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 6480,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 6484,
    "tessere": [
     "t_2201_498.json",
     "t_2201_501.json",
@@ -20113,8 +20125,8 @@
     11.0378
    ],
    "cartella": "italia-44n-10e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 13743,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 13756,
    "tessere": [
     "t_2198_507.json",
     "t_2198_508.json",
@@ -21501,8 +21513,8 @@
     12.0378
    ],
    "cartella": "italia-44n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 18277,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 18299,
    "tessere": [
     "t_2198_556.json",
     "t_2198_562.json",
@@ -22767,8 +22779,8 @@
     13.0378
    ],
    "cartella": "italia-44n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 8441,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 8444,
    "tessere": [
     "t_2198_620.json",
     "t_2198_621.json",
@@ -23284,7 +23296,7 @@
     7.0384
    ],
    "cartella": "italia-45n-6e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 780,
    "tessere": [
     "t_2249_345.json",
@@ -23405,8 +23417,8 @@
     8.0384
    ],
    "cartella": "italia-45n-7e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 17292,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 17307,
    "tessere": [
     "t_2248_357.json",
     "t_2248_358.json",
@@ -23537,6 +23549,8 @@
     "t_2251_397.json",
     "t_2251_398.json",
     "t_2251_399.json",
+    "t_2251_400.json",
+    "t_2251_401.json",
     "t_2252_349.json",
     "t_2252_350.json",
     "t_2252_351.json",
@@ -23576,6 +23590,8 @@
     "t_2252_397.json",
     "t_2252_398.json",
     "t_2252_399.json",
+    "t_2252_400.json",
+    "t_2252_401.json",
     "t_2253_351.json",
     "t_2253_352.json",
     "t_2253_366.json",
@@ -24626,8 +24642,8 @@
     9.0384
    ],
    "cartella": "italia-45n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 35238,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 35338,
    "tessere": [
     "t_2248_402.json",
     "t_2248_403.json",
@@ -24671,6 +24687,7 @@
     "t_2250_399.json",
     "t_2250_400.json",
     "t_2250_402.json",
+    "t_2250_403.json",
     "t_2250_404.json",
     "t_2250_405.json",
     "t_2250_408.json",
@@ -24700,7 +24717,11 @@
     "t_2250_450.json",
     "t_2251_398.json",
     "t_2251_399.json",
+    "t_2251_400.json",
+    "t_2251_401.json",
+    "t_2251_402.json",
     "t_2251_403.json",
+    "t_2251_405.json",
     "t_2251_407.json",
     "t_2251_409.json",
     "t_2251_411.json",
@@ -24724,6 +24745,8 @@
     "t_2251_451.json",
     "t_2252_398.json",
     "t_2252_399.json",
+    "t_2252_400.json",
+    "t_2252_401.json",
     "t_2252_402.json",
     "t_2252_403.json",
     "t_2252_404.json",
@@ -24919,6 +24942,7 @@
     "t_2258_439.json",
     "t_2258_440.json",
     "t_2258_444.json",
+    "t_2258_447.json",
     "t_2258_448.json",
     "t_2258_449.json",
     "t_2258_450.json",
@@ -24988,6 +25012,7 @@
     "t_2261_422.json",
     "t_2261_423.json",
     "t_2261_425.json",
+    "t_2261_430.json",
     "t_2261_434.json",
     "t_2261_439.json",
     "t_2261_440.json",
@@ -26375,8 +26400,8 @@
     10.0384
    ],
    "cartella": "italia-45n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 83335,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 83393,
    "tessere": [
     "t_2248_449.json",
     "t_2248_450.json",
@@ -28516,8 +28541,8 @@
     11.0384
    ],
    "cartella": "italia-45n-10e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 38827,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 38838,
    "tessere": [
     "t_2248_501.json",
     "t_2248_502.json",
@@ -30129,8 +30154,8 @@
     12.0384
    ],
    "cartella": "italia-45n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 83877,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 83941,
    "tessere": [
     "t_2248_551.json",
     "t_2248_555.json",
@@ -31976,8 +32001,8 @@
     13.0384
    ],
    "cartella": "italia-45n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 31898,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 31915,
    "tessere": [
     "t_2248_598.json",
     "t_2248_609.json",
@@ -32318,6 +32343,7 @@
     "t_2277_619.json",
     "t_2277_621.json",
     "t_2277_622.json",
+    "t_2277_628.json",
     "t_2277_629.json",
     "t_2277_630.json",
     "t_2277_631.json",
@@ -33180,8 +33206,8 @@
     14.0384
    ],
    "cartella": "italia-45n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 8292,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 8296,
    "tessere": [
     "t_2279_686.json",
     "t_2279_687.json",
@@ -33627,7 +33653,7 @@
     9.0392
    ],
    "cartella": "italia-46n-8e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 2071,
    "tessere": [
     "t_2298_402.json",
@@ -33876,7 +33902,7 @@
     10.0392
    ],
    "cartella": "italia-46n-9e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 2997,
    "tessere": [
     "t_2298_448.json",
@@ -34276,8 +34302,8 @@
     11.0392
    ],
    "cartella": "italia-46n-10e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 4259,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 4258,
    "tessere": [
     "t_2298_503.json",
     "t_2298_504.json",
@@ -34859,8 +34885,8 @@
     12.0392
    ],
    "cartella": "italia-46n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 16260,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 16267,
    "tessere": [
     "t_2298_548.json",
     "t_2298_549.json",
@@ -35196,6 +35222,7 @@
     "t_2309_572.json",
     "t_2309_583.json",
     "t_2309_584.json",
+    "t_2309_589.json",
     "t_2309_591.json",
     "t_2309_592.json",
     "t_2309_593.json",
@@ -36139,8 +36166,8 @@
     13.0392
    ],
    "cartella": "italia-46n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 7268,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 7270,
    "tessere": [
     "t_2298_608.json",
     "t_2298_610.json",
@@ -36235,6 +36262,7 @@
     "t_2301_634.json",
     "t_2301_641.json",
     "t_2301_643.json",
+    "t_2301_644.json",
     "t_2301_648.json",
     "t_2301_649.json",
     "t_2301_651.json",
@@ -36962,8 +36990,8 @@
     14.0392
    ],
    "cartella": "italia-46n-13e",
-   "aggiornato": "2026-11-09T06:42:44Z",
-   "elementi": 4630,
+   "aggiornato": "2026-11-16T06:44:32Z",
+   "elementi": 4633,
    "tessere": [
     "t_2298_649.json",
     "t_2298_651.json",
@@ -37461,7 +37489,7 @@
     12.0399
    ],
    "cartella": "italia-47n-11e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 75,
    "tessere": [
     "t_2348_574.json",
@@ -37497,7 +37525,7 @@
     13.0399
    ],
    "cartella": "italia-47n-12e",
-   "aggiornato": "2026-11-09T06:42:44Z",
+   "aggiornato": "2026-11-16T06:44:32Z",
    "elementi": 26,
    "tessere": [
     "t_2349_598.json",
@@ -37517,5 +37545,5 @@
  "licenza": "Open Database License (ODbL) 1.0",
  "licenza_url": "https://opendatacommons.org/licenses/odbl/1-0/",
  "generato_da": "https://github.com/quivicino/Parking",
- "dati_osm": "2026-11-08T21:21:00Z"
+ "dati_osm": "2026-11-14T21:20:41Z"
 }

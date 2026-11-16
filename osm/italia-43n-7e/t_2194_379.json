@@ -1,1 +1,1 @@
-{"elements":[{"type":"way","id":200711939,"tags":{"amenity":"parking","_postiStimati":"58"},"center":{"lat":43.889808,"lon":7.599649}}]}
+{"elements":[{"type":"way","id":200711939,"tags":{"access":"yes","amenity":"parking","charge":"1EUR/hour","fee":"yes","parking":"surface","_postiStimati":"58"},"center":{"lat":43.889808,"lon":7.599649}}]}
