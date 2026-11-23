@@ -1133,6 +1133,15 @@
       if ((autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible") bloccoSchermo = b;
       else b.release().catch(() => {});
     } catch (e) {
+      if (e && e.name === "NotAllowedError") {
+        // iPhone: lo schermo resta acceso solo se la richiesta parte da un tocco. All'apertura dell'app e ogni volta
+        // che ci si torna non c'è ancora stato un tocco: lo si chiede con una nota (sparisce appena funziona).
+        $("nota-schermo").textContent = "Per tenere lo schermo sempre acceso tocca una volta lo schermo (il telefono lo chiede ogni volta che apri o riapri l'app).";
+        $("nota-schermo").hidden = false;
+        richiestaInCorso = false;
+        mostraOcchio();
+        return;
+      }
       // Il primo tentativo spesso fallisce (iPhone: finché non si tocca lo schermo, o mentre l'app torna in primo piano).
       // Si riprova dopo 3 secondi; l'avviso compare solo se anche allora lo schermo non resta acceso.
       const testo = "Il telefono non permette di tenere lo schermo acceso" +
@@ -1158,7 +1167,11 @@
   }
   document.addEventListener("visibilitychange", aggiornaSchermoAcceso);
   // Alcuni browser concedono il blocco solo dopo un tocco: si riprova al primo tocco
-  document.addEventListener("pointerdown", () => { toccato = true; if ((autoAttivo || schermoPerSalvaschermo) && !bloccoSchermo) aggiornaSchermoAcceso(); }, { passive: true });
+  // Su iPhone il tocco "vale" alla fine (touchend / click), non quando il dito appoggia (pointerdown):
+  // la richiesta fatta in pointerdown viene rifiutata con NotAllowedError.
+  const riprovaAlTocco = () => { toccato = true; if ((autoAttivo || schermoPerSalvaschermo) && !bloccoSchermo) { tentativiSchermo = 0; aggiornaSchermoAcceso(); } };
+  ["touchend", "click", "keydown"].forEach((ev) => document.addEventListener(ev, riprovaAlTocco, { passive: true, capture: true }));
+  document.addEventListener("pointerdown", () => { toccato = true; }, { passive: true });
   let secAuto = cfg.autoRefreshSecondi ?? 120;
   try {
     const salvato = localStorage.getItem("postolibero.auto");
