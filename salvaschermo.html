@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Qui-Auto</title>
+  <meta name="description" content="Salvaschermo di Qui-Parking: dov'è la tua auto, salvataggio del parcheggio e pagamento della sosta">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Qui-Auto">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <link rel="manifest" href="manifest-salvaschermo.webmanifest">
+  <link rel="apple-touch-icon" href="apple-touch-icon-salvaschermo.png">
+  <link rel="icon" href="icon-salvaschermo-192.png">
+  <script>
+    // Aperta dall'icona sulla schermata Home: va subito al salvaschermo di Qui-Parking
+    if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) location.replace("./?salvaschermo=1");
+  </script>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; background: #000; color: #e9edf3; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 520px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 20px 40px; }
+    .testa { display: flex; align-items: center; gap: 16px; }
+    .testa img { width: 76px; height: 76px; border-radius: 18px; }
+    h1 { margin: 0; font-size: 26px; line-height: 1.15; }
+    .sotto { margin: 4px 0 0; color: #9aa4b5; }
+    .apri, .installa { display: block; width: 100%; box-sizing: border-box; margin: 24px 0 0; padding: 15px; border: 0; border-radius: 14px;
+      background: #e9edf3; color: #111418; font: 700 18px system-ui, sans-serif; text-align: center; text-decoration: none; }
+    .installa { background: #1b4f9c; color: #fff; margin-top: 12px; }
+    h2 { margin: 30px 0 8px; font-size: 18px; }
+    ol { margin: 0; padding-left: 22px; color: #c9d0db; }
+    li { margin: 6px 0; }
+    .nota { margin-top: 26px; color: #7c8697; font-size: 14px; }
+    a { color: #8fb6ff; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="testa">
+      <img src="icon-salvaschermo-192.png" alt="">
+      <div>
+        <h1>Qui-Auto</h1>
+        <p class="sotto">Il salvaschermo di Qui-Parking, con un'icona tutta sua</p>
+      </div>
+    </div>
+    <a class="apri" href="./?salvaschermo=1">Apri il salvaschermo</a>
+    <button class="installa" id="installa" type="button" hidden>Metti l'icona sulla schermata Home</button>
+
+    <h2>Metti l'icona sulla schermata Home</h2>
+    <p><b>iPhone</b> (Safari)</p>
+    <ol>
+      <li>Tocca il pulsante <b>Condividi</b> (il quadrato con la freccia in su).</li>
+      <li>Scegli <b>Aggiungi alla schermata Home</b>, poi <b>Aggiungi</b>.</li>
+    </ol>
+    <p><b>Android</b> (Chrome)</p>
+    <ol>
+      <li>Tocca il pulsante blu qui sopra, se c'è; altrimenti il menu <b>⋮</b> in alto a destra.</li>
+      <li>Scegli <b>Aggiungi a schermata Home</b> (o <b>Installa app</b>).</li>
+    </ol>
+    <p>Su Android puoi anche tenere premuta l'icona di Qui-Parking: compare la scorciatoia <b>Salvaschermo</b>.</p>
+
+    <p class="nota">L'icona apre Qui-Parking già nel salvaschermo: l'auto salvata, le impostazioni e le app per pagare sono le stesse. Tocca lo schermo per passare alla mappa. <a href="./">Torna a Qui-Parking</a></p>
+  </main>
+  <script>
+    let invito = null;
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); invito = e; document.getElementById("installa").hidden = false; });
+    document.getElementById("installa").addEventListener("click", async () => {
+      if (!invito) return;
+      invito.prompt();
+      try { await invito.userChoice; } catch (e) { /* ignora */ }
+      invito = null; document.getElementById("installa").hidden = true;
+    });
+  </script>
+</body>
+</html>

@@ -1443,6 +1443,8 @@
       if (!aperto) return;
       $("ss-ora").textContent = oraDi(Date.now());
       const g = stato.gps, a = Auto.info();
+      // "Paga la sosta" quando c'è l'auto salvata e non si sta guidando
+      $("ss-paga").hidden = !(a.posto && !a.inGuida && !(a.v != null && a.v >= 15));
       if (!g) { mostra({ icona: "", grande: "…", sotto: "In attesa della posizione GPS" }); return; }
       const v = a.v;
       if (a.inGuida || (v != null && v >= 15)) {
@@ -1516,14 +1518,145 @@
     }
     setInterval(controlla, 5000);
 
+
+    // ---------- Paga la sosta ----------
+    // Mostra le app per pagare la sosta, con quelle ammesse nel Comune dove sei (cfg.appSosta), e apre
+    // quella scelta. Android: apre l'app se c'è, altrimenti il Play Store. iPhone: apre la scheda
+    // dell'App Store, che mostra "Apri" se l'app è installata. Il pagamento si fa nell'app.
+    const AS = cfg.appSosta || { app: [], comuni: {} };
+    const K_ALTRE = "postolibero.paga.altre", K_USATE = "postolibero.paga.usate", K_COMUNI = "postolibero.paga.comuni";
+    const leggiJ = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") || d; } catch (e) { return d; } };
+    const scriviJ = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignora */ } };
+    const normale = (t) => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+    let comune = null, comuneChiave = null, cercaInCorso = null;
+
+    function cercaComune(lat, lon) {     // dal punto al nome del Comune (Nominatim), con memoria per zona
+      const chiave = lat.toFixed(2) + "," + lon.toFixed(2);
+      if (chiave === comuneChiave && comune) return Promise.resolve(comune);
+      const mem = leggiJ(K_COMUNI, {});
+      if (mem[chiave]) { comune = mem[chiave]; comuneChiave = chiave; return Promise.resolve(comune); }
+      if (cercaInCorso) return cercaInCorso;
+      const url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=it&lat=" + lat.toFixed(5) + "&lon=" + lon.toFixed(5);
+      cercaInCorso = fetch(url, { headers: { Accept: "application/json" } }).then((r) => r.ok ? r.json() : null).then((j) => {
+        const a = (j && j.address) || {};
+        const nome = a.city || a.town || a.village || a.municipality || null;
+        if (nome) {
+          comune = nome; comuneChiave = chiave;
+          const m = leggiJ(K_COMUNI, {}); m[chiave] = nome;
+          const chiavi = Object.keys(m); if (chiavi.length > 200) delete m[chiavi[0]];
+          scriviJ(K_COMUNI, m);
+        }
+        return nome;
+      }).catch(() => null).finally(() => { cercaInCorso = null; });
+      return cercaInCorso;
+    }
+
+    function linkApp(a) {
+      if (a.link) return { url: a.link, nuova: true };
+      const ua = navigator.userAgent;
+      const android = /Android/i.test(ua);
+      const ios = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (android && a.android) {
+        const store = "https://play.google.com/store/apps/details?id=" + a.android;
+        return { url: "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=" + a.android +
+          ";S.browser_fallback_url=" + encodeURIComponent(store) + ";end", nuova: false };
+      }
+      if (ios && a.ios) return { url: "https://apps.apple.com/it/app/id" + a.ios, nuova: false };
+      return { url: a.web, nuova: true };
+    }
+    function apriApp(a) {
+      const usate = leggiJ(K_USATE, {});
+      usate["*"] = a.id;
+      if (comune) usate[normale(comune)] = a.id;
+      scriviJ(K_USATE, usate);
+      const l = linkApp(a);
+      if (!l.url) return;
+      if (l.nuova) window.open(l.url, "_blank", "noopener");
+      else location.href = l.url;
+    }
+
+    function elencoApp() {
+      const altre = leggiJ(K_ALTRE, []).map((x, i) => ({ id: "mia-" + i, nome: x.nome, link: x.link, mia: i }));
+      return AS.app.concat(altre);
+    }
+    function disegnaFoglio() {
+      const dati = comune ? AS.comuni[normale(comune)] : null;
+      const usate = leggiJ(K_USATE, {});
+      const qui = comune ? usate[normale(comune)] : null;
+      $("ss-comune").innerHTML = !comune ? "Comune non riconosciuto: ecco tutte le app."
+        : dati ? `A <b>${esc(comune)}</b> le strisce blu si pagano con:`
+        : `Per <b>${esc(comune)}</b> non ho ancora l'elenco delle app: prova quella che usi di solito.`;
+      const voci = elencoApp().map((a) => {
+        let stato = "", badge = "";
+        if (a.mia != null) { stato = "mia"; badge = "aggiunta da te"; }
+        if (dati && dati.app.includes(a.id)) { stato = "si"; badge = "ammessa qui"; }
+        else if (dati && a.mia == null) { stato = "no"; badge = "non risulta qui"; }
+        if (qui === a.id) { stato = stato === "no" ? "usata" : (stato || "usata"); badge = "usata da te qui"; }
+        if (!badge && usate["*"] === a.id) badge = "la tua ultima";
+        const peso = (qui === a.id ? 0 : stato === "si" ? 1 : usate["*"] === a.id ? 2 : stato === "mia" ? 3 : stato === "no" ? 5 : 4);
+        return { a, stato, badge, peso };
+      }).sort((x, y) => x.peso - y.peso);
+      const lista = $("ss-app-lista");
+      lista.innerHTML = "";
+      for (const v of voci) {
+        const riga = document.createElement("div");
+        riga.className = "ss-app " + v.stato;
+        riga.innerHTML = `<button type="button" class="ss-app-apri"><span>${esc(v.a.nome)}</span>${v.badge ? `<span class="ss-app-badge">${v.badge}</span>` : ""}</button>` +
+          (v.a.mia != null ? `<button type="button" class="ss-app-togli" aria-label="Togli ${esc(v.a.nome)}">×</button>` : "");
+        riga.querySelector(".ss-app-apri").addEventListener("click", () => apriApp(v.a));
+        const togli = riga.querySelector(".ss-app-togli");
+        if (togli) togli.addEventListener("click", () => {
+          const l = leggiJ(K_ALTRE, []); l.splice(v.a.mia, 1); scriviJ(K_ALTRE, l); disegnaFoglio();
+        });
+        lista.appendChild(riga);
+      }
+      const altre = dati && dati.altre && dati.altre.length ? dati.altre : null;
+      $("ss-altre").hidden = !altre;
+      if (altre) $("ss-altre").textContent = "Qui funzionano anche: " + altre.join(", ") + ". Puoi aggiungerle con «Aggiungi un'altra app».";
+    }
+    function apriFoglio() {
+      $("ss-foglio").hidden = false;
+      $("ss-nuova").hidden = true; $("ss-foglio-azioni").hidden = false;
+      disegnaFoglio();
+      if (stato.gps) cercaComune(stato.gps.lat, stato.gps.lon).then(() => { if (!$("ss-foglio").hidden) disegnaFoglio(); });
+    }
+    function chiudiFoglio() { $("ss-foglio").hidden = true; }
+    $("ss-paga").addEventListener("click", (e) => { e.stopPropagation(); apriFoglio(); });
+    $("ss-foglio").addEventListener("click", (e) => { e.stopPropagation(); if (e.target === $("ss-foglio")) chiudiFoglio(); });
+    $("ss-foglio-chiudi").addEventListener("click", chiudiFoglio);
+    $("ss-aggiungi").addEventListener("click", () => {
+      $("ss-nuova").hidden = false; $("ss-foglio-azioni").hidden = true;
+      $("ss-nuova-nome").value = ""; $("ss-nuova-link").value = "";
+      $("ss-nuova-nome").focus();
+    });
+    $("ss-nuova-annulla").addEventListener("click", () => { $("ss-nuova").hidden = true; $("ss-foglio-azioni").hidden = false; });
+    $("ss-nuova").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nome = $("ss-nuova-nome").value.trim(), link = $("ss-nuova-link").value.trim();
+      if (!nome || !/^https?:\/\//i.test(link)) { toast("Scrivi il nome e un link che inizia con https://"); return; }
+      const l = leggiJ(K_ALTRE, []); l.push({ nome, link }); scriviJ(K_ALTRE, l);
+      $("ss-nuova").hidden = true; $("ss-foglio-azioni").hidden = false;
+      disegnaFoglio();
+      toast(nome + " aggiunta");
+    });
+
     const tocco = () => { ultimoTocco = Date.now(); };
     ["pointerdown", "keydown", "wheel"].forEach((ev) => document.addEventListener(ev, tocco, { passive: true, capture: true }));
-    el.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") chiudi(); });
+    el.addEventListener("click", (e) => { if (e.target.closest(".ss-paga, .ss-foglio")) return; e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
+    document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!$("ss-foglio").hidden) chiudiFoglio(); else chiudi(); });
     $("btn-salvaschermo").addEventListener("click", () => {
       if (window.QuiBussola) QuiBussola.permesso();   // iPhone: permesso della bussola al tocco
       apri();
     });
+    // Aperto dall'icona "Qui-Auto" sulla Home o dalla scorciatoia: ./?salvaschermo=1
+    try {
+      const qs = new URLSearchParams(location.search);
+      if (qs.has("salvaschermo")) {
+        qs.delete("salvaschermo");
+        history.replaceState(null, "", location.pathname + (qs.toString() ? "?" + qs : "") + location.hash);
+        setTimeout(apri, 0);
+      }
+    } catch (e) { /* ignora */ }
     return { apri, chiudi, aggiorna, aperto: () => aperto };
   })();
 

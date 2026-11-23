@@ -4,7 +4,7 @@
  */
 window.POSTOLIBERO_CONFIG = {
   // Versione dell'app, mostrata in fondo alla pagina Elenco. Aumentala a ogni aggiornamento.
-  versione: "39",
+  versione: "40",
 
   // Raggio di ricerca iniziale in metri (modificabile anche dall'app)
   raggioMetri: 1000,
@@ -43,6 +43,36 @@ window.POSTOLIBERO_CONFIG = {
   // e ora sei a piedi lì vicino (entro dedottoMetri), l'app deduce dove hai lasciato l'auto.
   // Salvaschermo: si apre da solo dopo questi secondi senza tocchi (in guida o andando all'auto)
   salvaschermo: { dopoSecondi: 60 },
+
+  // "Paga la sosta" (nel salvaschermo): app proposte e app ammesse sulle strisce blu per Comune.
+  // android = nome del pacchetto (Play Store), ios = numero dell'app nell'App Store, web = sito.
+  // comuni: nome del Comune in minuscolo → id delle app qui sopra ammesse; "altre" = altre app del Comune.
+  // Fonti: siti dei gestori e dei Comuni, raccolta del 23/11/2026 (vedi claude/app-sosta-lombardia.md).
+  appSosta: {
+    app: [
+      { id: "easypark", nome: "EasyPark", android: "net.easypark.android", ios: "449594317", web: "https://www.easypark.com/it-it" },
+      { id: "mooneygo", nome: "MooneyGo", android: "net.pluservice.myCicero", ios: "595700208", web: "https://www.mooneygo.it/parcheggi/" },
+      { id: "telepass", nome: "Telepass", android: "uk.co.novaware.telepass.android", ios: "454224356", web: "https://www.telepass.com/it/privati/servizi/strisce-blu" },
+      { id: "unipolmove", nome: "UnipolMove", android: "it.unipolsai.move", ios: "1609074315", web: "https://www.unipolmove.it/strisce-blu/" }
+    ],
+    comuni: {
+      "milano": { app: ["easypark", "mooneygo", "telepass", "unipolmove"], altre: ["DropTicket", "Kinto Go", "Wetaxi", "Eni Live"] },
+      "brescia": { app: ["easypark", "mooneygo"], altre: ["DropTicket"] },
+      "monza": { app: ["easypark", "telepass"], altre: ["Monza Mobilità"] },
+      "bergamo": { app: ["easypark", "mooneygo", "telepass"], altre: ["DropTicket", "BMove"] },
+      "busto arsizio": { app: ["easypark", "mooneygo", "telepass"] },
+      "como": { app: ["easypark", "mooneygo", "telepass", "unipolmove"], altre: ["DropTicket"] },
+      "varese": { app: ["easypark", "telepass"] },
+      "sesto san giovanni": { app: ["telepass"], altre: ["APCOA Flow"] },
+      "pavia": { app: ["easypark", "mooneygo", "telepass", "unipolmove"] },
+      "cremona": { app: ["easypark", "mooneygo", "telepass"], altre: ["DropTicket", "PayByPhone", "Phonzie"] },
+      "vigevano": { app: ["easypark", "mooneygo"] },
+      "legnano": { app: ["easypark", "mooneygo", "telepass"], altre: ["DropTicket", "Tabnet", "BMove"] },
+      "gallarate": { app: ["easypark", "mooneygo", "telepass"] },
+      "rho": { app: ["easypark", "telepass"], altre: ["MyGestopark"] },
+      "mantova": { app: ["easypark", "mooneygo", "telepass"], altre: ["APCOA Flow", "ParkingMyCar", "Tap&Park"] }
+    }
+  },
   parcheggioAuto: { guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 50, liberaSecondi: 4, liberaMetri: 3000, liberaDopoMinuti: 3 },
 
   // Fonti open data con posti liberi in tempo reale.
