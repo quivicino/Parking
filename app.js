@@ -1171,7 +1171,7 @@
   //    si è fermi o a piedi lì vicino, l'auto viene messa in quell'ultimo punto.
   // L'utente corregge solo se serve: trascina il segnaposto o usa "Sposta dove sono".
   Auto = (function () {
-    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000 }, cfg.parcheggioAuto || {});
+    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 50, liberaSecondi: 4, liberaMetri: 3000, liberaDopoMinuti: 3 }, cfg.parcheggioAuto || {});
     const K_AUTO = "postolibero.auto.posto", K_GUIDA = "postolibero.auto.guida", K_ATTIVO = "postolibero.auto.attivo";
     const leggi = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
     const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignora */ } };
@@ -1181,6 +1181,7 @@
     let precedente = null;              // per "Annulla"
     let prima = null;                   // fix precedente, per calcolare la velocità
     let inizioGuida = null, inGuida = false, sosta = null, ultimaScrittura = 0, controllatoAvvio = false;
+    let veloceDa = null, liberato = null, pausaFino = 0;   // ripartenza: oltre liberaKmh il vecchio posto diventa libero
     const strato = L.layerGroup().addTo(mappa);
     let marker = null;
 
@@ -1196,6 +1197,11 @@
       const lat = p.coords.latitude, lon = p.coords.longitude, t = p.timestamp || Date.now();
       const v = velocitaKmh(p);
       if (!controllatoAvvio) { controllatoAvvio = true; deduciAllAvvio(lat, lon, t, v); }
+      // Auto salvata (a mano o da sola) e ora si viaggia oltre i 50 km/h: il posto è stato lasciato
+      if (posto && t > pausaFino && v != null && v >= C.liberaKmh) {
+        if (veloceDa == null) veloceDa = t;
+        if (t - veloceDa >= C.liberaSecondi * 1000) { veloceDa = null; lasciaLibero(lat, lon, t); }
+      } else if (v != null) veloceDa = null;   // un fix senza velocità non azzera il conteggio
       if (!attivo) { if (!prima || t - prima.t >= 2000) prima = { lat, lon, t }; return; }
       if (v != null && v >= C.guidaKmh) {
         if (inizioGuida == null) inizioGuida = t;
@@ -1230,7 +1236,7 @@
     }
 
     function salva(lat, lon, modo) {
-      precedente = posto;
+      precedente = posto; liberato = null; pausaFino = 0;
       posto = { lat: +lat.toFixed(6), lon: +lon.toFixed(6), t: Date.now(), modo };
       scrivi(K_AUTO, posto);
       disegna();
@@ -1239,7 +1245,38 @@
         if (modo === "auto") parla("Parcheggio salvato");
       }
     }
+    // Ripartenza: toglie l'auto dalla mappa e segnala libero il posto dove era parcheggiata
+    async function lasciaLibero(lat, lon, t) {
+      const p = posto;
+      precedente = p; posto = null; liberato = null;
+      scrivi(K_AUTO, null);
+      disegna();
+      if (attivo) { inGuida = true; inizioGuida = t; }   // si sta guidando: alla prossima sosta salva di nuovo
+      const daMinuti = (Date.now() - p.t) / 60000;
+      if (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri) {
+        // sosta troppo breve (un semaforo, una coda) o auto lasciata lontano da qui: nessuna segnalazione
+        avviso("Sei ripartito: auto tolta dalla mappa", true);
+        return;
+      }
+      try {
+        await Segnalazioni.invia(p.lat, p.lon, "libero");
+        liberato = p;
+        stato.miaSegnalazione = { lat: p.lat, lon: p.lon, t: Date.now() };
+        stato.ultimaSegnalazione = Date.now();
+        avviso("Sei ripartito: il tuo posto è segnalato libero", true);
+        parla("Posto lasciato libero");
+        await caricaSegnalazioni();
+        render();
+      } catch (e) {
+        avviso("Sei ripartito: auto tolta dalla mappa (segnalazione non inviata)", true);
+      }
+    }
     function annulla() {
+      if (precedente && !posto) pausaFino = Date.now() + 30 * 60000;   // annullata una ripartenza: per 30 minuti non ripete
+      if (liberato) {   // non era la mia auto a partire: annulla anche il "libero" appena inviato
+        const p = liberato; liberato = null;
+        Segnalazioni.invia(p.lat, p.lon, "occupato").then(caricaSegnalazioni).then(render).catch(() => {});
+      }
       posto = precedente; precedente = null;
       scrivi(K_AUTO, posto);
       disegna();
