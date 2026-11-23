@@ -1,7 +1,7 @@
 // Qui-Parking – service worker: rende l'app installabile e apribile offline.
 // I dati (parcheggi, segnalazioni) vengono sempre scaricati dalla rete.
 // Cambia il nome della cache a ogni aggiornamento: così l'iPhone capisce che c'è una versione nuova.
-const CACHE = "postolibero-46";
+const CACHE = "postolibero-47";
 const FILE = ["./", "index.html", "style.css", "config.js", "core.js", "segnalazioni.js", "app.js", "installa.js", "bussola.js", "favicon-64.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "guida.html", "manifest.webmanifest", "salvaschermo.html", "manifest-salvaschermo.webmanifest", "icon-salvaschermo-192.png", "icon-salvaschermo-512.png", "icon-salvaschermo-maskable-512.png", "apple-touch-icon-salvaschermo.png"];
 
 self.addEventListener("install", (e) => {

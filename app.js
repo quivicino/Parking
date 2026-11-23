@@ -1292,6 +1292,7 @@
       if (modo !== "manuale") {
         avviso(modo === "dedotto" ? "Auto lasciata qui? L'ho segnata sulla mappa" : "Parcheggio salvato", true);
         if (modo === "auto") parla("Parcheggio salvato");
+        if (modo === "auto") document.dispatchEvent(new CustomEvent("qp-parcheggiato"));   // il salvaschermo propone "Paga la sosta"
       }
     }
     // Ripartenza: toglie l'auto dalla mappa e segnala libero il posto dove era parcheggiata
@@ -1488,6 +1489,7 @@
       const g = stato.gps, a = Auto.info();
       // "Paga la sosta" quando c'è l'auto salvata e non si sta guidando
       $("ss-paga").hidden = !(a.posto && !a.inGuida && !(a.v != null && a.v >= 15));
+      if (!a.posto && !$("ss-foglio").hidden) chiudiFoglio();   // parcheggio annullato: il foglio si chiude
       if (!g) { mostra({ icona: "", grande: "…", sotto: "In attesa della posizione GPS" }); return; }
       const v = a.v;
       if (a.inGuida || (v != null && v >= 15)) {
@@ -1534,6 +1536,7 @@
     }
     function chiudi() {
       if (!aperto) return;
+      chiudiFoglio();
       aperto = false;
       el.hidden = true;
       clearInterval(timer);
@@ -1657,14 +1660,31 @@
       $("ss-altre").hidden = !altre;
       if (altre) $("ss-altre").textContent = "Qui funzionano anche: " + altre.join(", ") + ". Puoi aggiungerle con «Aggiungi un'altra app».";
     }
-    function apriFoglio() {
+    function apriFoglio(daSolo) {
+      $("ss-da-solo").hidden = !daSolo;
+      document.body.classList.add("foglio-aperto");
       $("ss-foglio").hidden = false;
       $("ss-nuova").hidden = true; $("ss-foglio-azioni").hidden = false;
       disegnaFoglio();
       if (stato.gps) cercaComune(stato.gps.lat, stato.gps.lon).then(() => { if (!$("ss-foglio").hidden) disegnaFoglio(); });
     }
-    function chiudiFoglio() { $("ss-foglio").hidden = true; }
-    $("ss-paga").addEventListener("click", (e) => { e.stopPropagation(); apriFoglio(); });
+    function chiudiFoglio() { $("ss-foglio").hidden = true; document.body.classList.remove("foglio-aperto"); }
+    // Dopo il salvataggio automatico del parcheggio si apre da solo "Paga la sosta" (nel salvaschermo).
+    // Rispetta l'impostazione del salvaschermo ("Solo col pulsante" = non si apre) e "Non aprire più da solo".
+    const K_PAGA_AUTO = "postolibero.paga.dasolo";
+    document.addEventListener("qp-parcheggiato", () => {
+      let si = true;
+      try { si = localStorage.getItem(K_PAGA_AUTO) !== "0"; } catch (e) { /* ignora */ }
+      if (!si || (!aperto && !dopo)) return;
+      apri();
+      setTimeout(() => apriFoglio(true), 300);
+    });
+    $("ss-mai").addEventListener("click", () => {
+      try { localStorage.setItem(K_PAGA_AUTO, "0"); } catch (e) { /* ignora */ }
+      $("ss-da-solo").hidden = true;
+      toast("Va bene: «Paga la sosta» si apre solo col pulsante");
+    });
+    $("ss-paga").addEventListener("click", (e) => { e.stopPropagation(); apriFoglio(false); });
     $("ss-foglio").addEventListener("click", (e) => { e.stopPropagation(); if (e.target === $("ss-foglio")) chiudiFoglio(); });
     $("ss-foglio-chiudi").addEventListener("click", chiudiFoglio);
     $("ss-aggiungi").addEventListener("click", () => {
