@@ -1090,9 +1090,10 @@
   // Con l'auto-refresh attivo il telefono non va in standby. Il browser toglie il blocco da solo
   // quando l'app va in secondo piano o il telefono viene bloccato: al ritorno lo si richiede.
   let autoAttivo = false, bloccoSchermo = null, richiestaInCorso = false;
+  let schermoPerSalvaschermo = false;   // il salvaschermo è aperto o sta per aprirsi da solo
   function mostraOcchio() { $("occhio").hidden = !bloccoSchermo; }
   async function aggiornaSchermoAcceso() {
-    const vuole = autoAttivo && document.visibilityState === "visible";
+    const vuole = (autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible";
     if (!vuole) {
       if (bloccoSchermo) { const b = bloccoSchermo; bloccoSchermo = null; b.release().catch(() => {}); }
       mostraOcchio();
@@ -1108,7 +1109,7 @@
     try {
       const b = await navigator.wakeLock.request("screen");
       b.addEventListener("release", () => { if (bloccoSchermo === b) { bloccoSchermo = null; mostraOcchio(); } });
-      if (autoAttivo && document.visibilityState === "visible") bloccoSchermo = b;
+      if ((autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible") bloccoSchermo = b;
       else b.release().catch(() => {});
     } catch (e) {
       // Spesso il primo tentativo fallisce finché non si tocca lo schermo: l'avviso solo dopo un tocco
@@ -1127,7 +1128,7 @@
   }
   document.addEventListener("visibilitychange", aggiornaSchermoAcceso);
   // Alcuni browser concedono il blocco solo dopo un tocco: si riprova al primo tocco
-  document.addEventListener("pointerdown", () => { toccato = true; if (autoAttivo && !bloccoSchermo) aggiornaSchermoAcceso(); }, { passive: true });
+  document.addEventListener("pointerdown", () => { toccato = true; if ((autoAttivo || schermoPerSalvaschermo) && !bloccoSchermo) aggiornaSchermoAcceso(); }, { passive: true });
   let secAuto = cfg.autoRefreshSecondi ?? 120;
   try {
     const salvato = localStorage.getItem("postolibero.auto");
@@ -1181,21 +1182,26 @@
     let precedente = null;              // per "Annulla"
     let prima = null;                   // fix precedente, per calcolare la velocità
     let inizioGuida = null, inGuida = false, sosta = null, ultimaScrittura = 0, controllatoAvvio = false;
-    let veloceDa = null, liberato = null, pausaFino = 0;   // ripartenza: oltre liberaKmh il vecchio posto diventa libero
+    let veloceDa = null, liberato = null, pausaFino = 0;
+    let ultimaV = null, ultimaVT = 0, ultimoPasso = 0;   // per il salvaschermo   // ripartenza: oltre liberaKmh il vecchio posto diventa libero
     const strato = L.layerGroup().addTo(mappa);
     let marker = null;
 
     function velocitaKmh(p) {
-      if (p.coords.speed != null && p.coords.speed >= 0) return p.coords.speed * 3.6;
+      if (p.coords.speed != null && p.coords.speed >= 0) return p.coords.speed * 3.6 <= 200 ? p.coords.speed * 3.6 : null;
       if (!prima) return null;
       const dt = (p.timestamp - prima.t) / 1000;
       if (dt < 2) return null;
-      return PL.distanza(prima.lat, prima.lon, p.coords.latitude, p.coords.longitude) / dt * 3.6;
+      // posizioni poco precise o salti impossibili (un fix sbagliato del GPS) non contano come velocità
+      if (p.coords.accuracy > 50) return null;
+      const v = PL.distanza(prima.lat, prima.lon, p.coords.latitude, p.coords.longitude) / dt * 3.6;
+      return v <= 200 ? v : null;
     }
 
     function posizione(p) {
       const lat = p.coords.latitude, lon = p.coords.longitude, t = p.timestamp || Date.now();
       const v = velocitaKmh(p);
+      if (v != null) { ultimaV = v; ultimaVT = Date.now(); if (v >= 2 && v < 9) ultimoPasso = Date.now(); }
       if (!controllatoAvvio) { controllatoAvvio = true; deduciAllAvvio(lat, lon, t, v); }
       // Auto salvata (a mano o da sola) e ora si viaggia oltre i 50 km/h: il posto è stato lasciato
       if (posto && t > pausaFino && v != null && v >= C.liberaKmh) {
@@ -1375,7 +1381,150 @@
       return li;
     }
     setTimeout(disegna, 0);
-    return { posizione, salva, perElenco, marker: () => marker };
+    function info() {
+      const recente = Date.now() - ultimaVT < 10000;
+      return { posto, attivo, inGuida, v: recente ? ultimaV : null, aPiedi: Date.now() - ultimoPasso < 30000 };
+    }
+    return { posizione, salva, perElenco, info, marker: () => marker };
+  })();
+
+  // ---------- Salvaschermo ----------
+  // Schermo nero con pochi elementi grandi. Con l'auto salvata: freccia verso l'auto e distanza.
+  // In guida: velocità e posti liberi segnalati vicino. Salvataggio e "posto lasciato libero"
+  // continuano a funzionare (modulo Auto). Si apre col pulsante con la luna oppure da solo dopo
+  // dopoSecondi senza toccare lo schermo, se si sta guidando o si va a piedi verso l'auto.
+  // Si chiude con un tocco. Lo schermo resta acceso (Wake Lock) finché è aperto.
+  const Salvaschermo = (function () {
+    const el = $("salvaschermo");
+    const K = "postolibero.salvaschermo";
+    const SECONDI = (cfg.salvaschermo && cfg.salvaschermo.dopoSecondi) || 60;
+    let dopo = SECONDI, aperto = false, ultimoTocco = Date.now(), angolo = null, timer = null;
+    try { if (localStorage.getItem(K) === "0") dopo = 0; } catch (e) { /* ignora */ }
+    $("salvaschermo-dopo").value = dopo ? "1" : "0";
+    $("salvaschermo-dopo").addEventListener("change", (e) => {
+      dopo = e.target.value === "1" ? SECONDI : 0;
+      try { localStorage.setItem(K, dopo ? "1" : "0"); } catch (err) { /* ignora */ }
+      toast(dopo ? "Il salvaschermo si apre da solo dopo 1 minuto senza tocchi, in auto o andando all'auto" : "Il salvaschermo si apre solo col pulsante con la luna");
+    });
+
+    const NOMI = ["nord", "nord-est", "est", "sud-est", "sud", "sud-ovest", "ovest", "nord-ovest"];
+    function rotta(la1, lo1, la2, lo2) {
+      const r = Math.PI / 180, dl = (lo2 - lo1) * r;
+      const y = Math.sin(dl) * Math.cos(la2 * r);
+      const x = Math.cos(la1 * r) * Math.sin(la2 * r) - Math.sin(la1 * r) * Math.cos(la2 * r) * Math.cos(dl);
+      return (Math.atan2(y, x) / r + 360) % 360;
+    }
+    const due = (n) => String(n).padStart(2, "0");
+    const oraDi = (t) => { const d = new Date(t); return due(d.getHours()) + ":" + due(d.getMinutes()); };
+    function ruota(gradi) {   // gira la freccia per la via più breve (359° → 1° non fa il giro intero)
+      if (angolo == null) angolo = gradi;
+      else angolo += ((((gradi - angolo) % 360) + 540) % 360) - 180;
+      $("ss-freccia").style.transform = "rotate(" + angolo.toFixed(1) + "deg)";
+    }
+    function mostra({ freccia = null, alNord = false, icona = "", grande = "", sotto = "", stato: st = "" }) {
+      $("ss-freccia").hidden = freccia == null;
+      document.querySelector(".ss-segno").classList.toggle("al-nord", alNord && freccia != null);   // "N" fermo in alto
+      if (freccia != null) ruota(freccia);
+      $("ss-icona").hidden = freccia != null;
+      $("ss-icona").className = "ss-icona " + icona;
+      $("ss-grande").innerHTML = grande;
+      $("ss-sotto").innerHTML = sotto;
+      $("ss-stato").textContent = st;
+    }
+    function postiVicini(lat, lon) {
+      const liberi = [];
+      for (const x of stato.segn || []) if (x.stato === "libero") liberi.push(PL.distanza(lat, lon, x.lat, x.lon));
+      for (const l of stato.reale || []) if (l.liberi > 0 && isFinite(l.lat)) liberi.push(PL.distanza(lat, lon, l.lat, l.lon));
+      const vicini = liberi.filter((d) => d <= 1000).sort((a, b) => a - b);
+      return vicini;
+    }
+
+    function aggiorna() {
+      if (!aperto) return;
+      $("ss-ora").textContent = oraDi(Date.now());
+      const g = stato.gps, a = Auto.info();
+      if (!g) { mostra({ icona: "", grande: "…", sotto: "In attesa della posizione GPS" }); return; }
+      const v = a.v;
+      if (a.inGuida || (v != null && v >= 15)) {
+        const vicini = postiVicini(g.lat, g.lon);
+        mostra({
+          icona: "guida",
+          grande: (v != null ? Math.round(v) : "–") + "<small>km/h</small>",
+          sotto: vicini.length
+            ? `<b>${vicini.length === 1 ? "1 posto libero" : vicini.length + " posti liberi"}</b> segnalat${vicini.length === 1 ? "o" : "i"} entro 1 km · il più vicino a ${PL.formattaDistanza(vicini[0])}`
+            : "Nessun posto libero segnalato entro 1 km",
+          stato: a.attivo ? "In guida · quando parcheggi salvo il posto da solo" : "In guida"
+        });
+        return;
+      }
+      if (a.posto) {
+        const d = PL.distanza(g.lat, g.lon, a.posto.lat, a.posto.lon);
+        const salvata = "La tua auto · salvata alle " + oraDi(a.posto.t);
+        if (d <= Math.max(15, Math.min(40, g.acc || 15))) {
+          mostra({ icona: "arrivato", grande: "Sei arrivato", sotto: "La tua auto è qui intorno", stato: salvata });
+          return;
+        }
+        const b = rotta(g.lat, g.lon, a.posto.lat, a.posto.lon);
+        const h = window.QuiBussola ? QuiBussola.direzione() : null;
+        mostra({
+          freccia: h != null ? b - h : b,
+          alNord: h == null,
+          grande: PL.formattaDistanza(d),
+          sotto: `${PL.minutiA_piedi(d)} min a piedi · verso ${NOMI[Math.round(b / 45) % 8]}`,
+          stato: h != null ? salvata : salvata + " · bussola non disponibile: la freccia è rispetto al nord (N in alto)"
+        });
+        return;
+      }
+      mostra({ icona: "", grande: "Nessuna auto", sotto: a.attivo ? "Quando parcheggi salvo il posto da solo" : "Tocca e usa «Ho parcheggiato» per salvare l'auto", stato: "" });
+    }
+
+    function apri() {
+      if (aperto) return;
+      aperto = true; angolo = null;
+      el.hidden = false;
+      schermoPerSalvaschermo = true; aggiornaSchermoAcceso();
+      aggiorna();
+      clearInterval(timer);
+      timer = setInterval(aggiorna, 500);
+    }
+    function chiudi() {
+      if (!aperto) return;
+      aperto = false;
+      el.hidden = true;
+      clearInterval(timer);
+      ultimoTocco = Date.now();
+      controlla();
+    }
+    // Ogni minuto il contenuto si sposta di pochi pixel: lo schermo non si "stampa" (burn-in)
+    setInterval(() => {
+      if (!aperto) return;
+      const dx = Math.round(Math.random() * 24 - 12), dy = Math.round(Math.random() * 24 - 12);
+      $("ss-contenuto").style.transform = `translate(${dx}px, ${dy}px)`;
+    }, 60000);
+
+    // Apertura da sola: dopo "dopo" secondi senza tocchi, in guida o a piedi verso l'auto salvata
+    function situazione() {
+      const a = Auto.info();
+      return a.inGuida || (a.v != null && a.v >= 15) || (!!a.posto && a.aPiedi);
+    }
+    function controlla() {
+      const serve = dopo > 0 && !aperto && situazione() && document.visibilityState === "visible";
+      // lo schermo resta acceso già prima che si apra, altrimenti il telefono si spegnerebbe prima del minuto
+      const vuole = aperto || serve;
+      if (vuole !== schermoPerSalvaschermo) { schermoPerSalvaschermo = vuole; aggiornaSchermoAcceso(); }
+      if (serve && Date.now() - ultimoTocco >= dopo * 1000) apri();
+    }
+    setInterval(controlla, 5000);
+
+    const tocco = () => { ultimoTocco = Date.now(); };
+    ["pointerdown", "keydown", "wheel"].forEach((ev) => document.addEventListener(ev, tocco, { passive: true, capture: true }));
+    el.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") chiudi(); });
+    $("btn-salvaschermo").addEventListener("click", () => {
+      if (window.QuiBussola) QuiBussola.permesso();   // iPhone: permesso della bussola al tocco
+      apri();
+    });
+    return { apri, chiudi, aggiorna, aperto: () => aperto };
   })();
 
   avviaGps();

@@ -4,7 +4,7 @@
  */
 window.POSTOLIBERO_CONFIG = {
   // Versione dell'app, mostrata in fondo alla pagina Elenco. Aumentala a ogni aggiornamento.
-  versione: "38",
+  versione: "39",
 
   // Raggio di ricerca iniziale in metri (modificabile anche dall'app)
   raggioMetri: 1000,
@@ -41,6 +41,8 @@ window.POSTOLIBERO_CONFIG = {
   // almeno; sostaSecondi/sostaMetri = fermi entro questo cerchio per questo tempo = parcheggiato.
   // dedottoOre: alla riapertura, se l'ultima posizione registrata era in auto da meno di queste ore
   // e ora sei a piedi lì vicino (entro dedottoMetri), l'app deduce dove hai lasciato l'auto.
+  // Salvaschermo: si apre da solo dopo questi secondi senza tocchi (in guida o andando all'auto)
+  salvaschermo: { dopoSecondi: 60 },
   parcheggioAuto: { guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 50, liberaSecondi: 4, liberaMetri: 3000, liberaDopoMinuti: 3 },
 
   // Fonti open data con posti liberi in tempo reale.

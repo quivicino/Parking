@@ -14,11 +14,15 @@
     const o = screen.orientation && screen.orientation.angle;
     return isFinite(o) ? o : (isFinite(window.orientation) ? +window.orientation : 0);
   }
+  function direzione() {
+    let dir = Date.now() - bussolaT < 3000 ? bussola : null;
+    if (dir == null && Date.now() - rottaT < 10000) dir = rottaGps;
+    return dir;
+  }
   function disegna() {
     const cono = document.querySelector(".io-cono");
     if (!cono) return;
-    let dir = Date.now() - bussolaT < 3000 ? bussola : null;
-    if (dir == null && Date.now() - rottaT < 10000) dir = rottaGps;
+    const dir = direzione();
     cono.hidden = dir == null;
     if (dir != null) cono.style.transform = "rotate(" + Math.round(dir) + "deg)";
   }
@@ -40,9 +44,10 @@
   const conPermesso = !assoluto && D && typeof D.requestPermission === "function";
   if (assoluto) window.addEventListener("deviceorientationabsolute", suBussola, true);
   else if (D && !conPermesso) window.addEventListener("deviceorientation", suBussola, true);
+  let chiedi = () => {};
   if (conPermesso) {
     let chiesta = false;
-    const chiedi = () => {
+    chiedi = () => {
       if (chiesta) return;
       chiesta = true;
       D.requestPermission().then((r) => {
@@ -59,6 +64,8 @@
   }
 
   window.QuiBussola = {
+    direzione,                       // gradi da nord (bussola, o direzione del GPS in movimento), null se non nota
+    permesso() { chiedi(); },        // iPhone: chiede il permesso (va chiamato dentro un tocco)
     gps(c) {
       if (c && c.heading != null && isFinite(c.heading) && c.speed != null && c.speed > 0.7) { rottaGps = c.heading; rottaT = Date.now(); }
       disegna();
