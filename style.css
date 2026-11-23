@@ -578,3 +578,17 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ss-nota { margin: 14px 0 0; color: #6c7688; font: 500 12.5px/1.4 var(--font-body); }
 
 .riga-home { display: block; margin: -4px 0 12px; padding: 4px 16px 0; color: var(--blu); font: 600 14px var(--font-body); text-decoration: none; }
+
+/* ---- Mostra / Nascondi impostazioni (v42) ---- */
+.btn-impostazioni {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 12px; border: 0; border-radius: 10px; background: var(--bg); color: var(--testo);
+  font: 700 15px/1 var(--font-display); letter-spacing: .04em; text-align: left;
+}
+.btn-impostazioni #btn-impostazioni-testo { flex: 1; }
+.btn-impostazioni .freccina { transition: transform .2s; color: var(--testo-2); }
+.btn-impostazioni[aria-expanded="true"] .freccina { transform: rotate(180deg); }
+.occhio-mini { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--libero); color: #fff; }
+.occhio-mini[hidden] { display: none; }
+.impostazioni { display: flex; flex-direction: column; gap: 14px; }
+.impostazioni[hidden] { display: none; }

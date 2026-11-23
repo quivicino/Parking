@@ -1066,6 +1066,22 @@
     else if (sintesi) sintesi.cancel();
   });
 
+  // ---------- Mostra / Nascondi impostazioni (pagina Elenco) ----------
+  // Chiuse all'inizio; la scelta resta salvata.
+  (function () {
+    const K = "postolibero.impostazioni";
+    function imposta(aperte, salva) {
+      $("impostazioni").hidden = !aperte;
+      $("btn-impostazioni").setAttribute("aria-expanded", aperte ? "true" : "false");
+      $("btn-impostazioni-testo").textContent = aperte ? "Nascondi impostazioni" : "Mostra impostazioni";
+      if (salva) { try { localStorage.setItem(K, aperte ? "1" : "0"); } catch (e) { /* ignora */ } }
+    }
+    let aperte = false;
+    try { aperte = localStorage.getItem(K) === "1"; } catch (e) { /* ignora */ }
+    imposta(aperte, false);
+    $("btn-impostazioni").addEventListener("click", () => imposta($("impostazioni").hidden, true));
+  })();
+
   // ---------- Auto-refresh ----------
   // Ogni N secondi fa come premere "posizione" e poi "aggiorna".
   // I parcheggi di OpenStreetMap vengono riscaricati solo se ti sei spostato o dopo 10 minuti,
@@ -1091,7 +1107,12 @@
   // quando l'app va in secondo piano o il telefono viene bloccato: al ritorno lo si richiede.
   let autoAttivo = false, bloccoSchermo = null, richiestaInCorso = false;
   let schermoPerSalvaschermo = false;   // il salvaschermo è aperto o sta per aprirsi da solo
-  function mostraOcchio() { $("occhio").hidden = !bloccoSchermo; }
+  function mostraOcchio() {
+    $("occhio").hidden = !bloccoSchermo;
+    $("occhio-mini").hidden = !bloccoSchermo;   // l'occhio si vede anche con le impostazioni chiuse
+    if (bloccoSchermo) { $("nota-schermo").hidden = true; clearTimeout(timerAvvisoSchermo); tentativiSchermo = 0; }   // lo schermo resta acceso: niente avviso
+  }
+  let timerAvvisoSchermo = null, tentativiSchermo = 0;
   async function aggiornaSchermoAcceso() {
     const vuole = (autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible";
     if (!vuole) {
@@ -1112,9 +1133,18 @@
       if ((autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible") bloccoSchermo = b;
       else b.release().catch(() => {});
     } catch (e) {
-      // Spesso il primo tentativo fallisce finché non si tocca lo schermo: l'avviso solo dopo un tocco
-      if (toccato) avvisaSchermo("Il telefono non permette di tenere lo schermo acceso" +
-        (e && e.name ? " (" + e.name + (e.message ? ": " + e.message : "") + ")" : "") + ".");
+      // Il primo tentativo spesso fallisce (iPhone: finché non si tocca lo schermo, o mentre l'app torna in primo piano).
+      // Si riprova dopo 3 secondi; l'avviso compare solo se anche allora lo schermo non resta acceso.
+      const testo = "Il telefono non permette di tenere lo schermo acceso" +
+        (e && e.name ? " (" + e.name + (e.message ? ": " + e.message : "") + ")" : "") +
+        ". Se è attivo il Risparmio energetico, disattivalo.";
+      clearTimeout(timerAvvisoSchermo);
+      if (++tentativiSchermo > 3) { if (toccato) avvisaSchermo(testo); }   // dopo 3 riprove non insiste più
+      else timerAvvisoSchermo = setTimeout(async () => {
+        await aggiornaSchermoAcceso();
+        const vuoleAncora = (autoAttivo || schermoPerSalvaschermo) && document.visibilityState === "visible";
+        if (vuoleAncora && !bloccoSchermo && toccato) avvisaSchermo(testo);
+      }, 3000);
     }
     richiestaInCorso = false;
     mostraOcchio();

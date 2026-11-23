@@ -13,8 +13,16 @@
   <link rel="apple-touch-icon" href="apple-touch-icon-salvaschermo.png">
   <link rel="icon" href="icon-salvaschermo-192.png">
   <script>
-    // Aperta dall'icona sulla schermata Home: va subito al salvaschermo di Qui-Parking
-    if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) location.replace("./?salvaschermo=1");
+    // Aperta dall'icona Qui-Auto sulla schermata Home: va subito al salvaschermo di Qui-Parking.
+    // Aperta da un collegamento dentro Qui-Parking (?istruzioni=1): mostra le istruzioni.
+    (function () {
+      var app = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+      var istruzioni = /[?&]istruzioni=1/.test(location.search);
+      window.__dentroApp = app && istruzioni;
+      if (app && !istruzioni) { location.replace("./?salvaschermo=1"); return; }
+      // l'indirizzo resta pulito: se da Safari si aggiunge l'icona, l'icona apre il salvaschermo
+      if (istruzioni) try { history.replaceState(null, "", location.pathname); } catch (e) {}
+    })();
   </script>
   <style>
     :root { color-scheme: dark; }
@@ -30,6 +38,10 @@
     h2 { margin: 30px 0 8px; font-size: 18px; }
     ol { margin: 0; padding-left: 22px; color: #c9d0db; }
     li { margin: 6px 0; }
+    .avviso { margin: 22px 0 0; padding: 14px; border-radius: 14px; background: #1e2a3d; color: #dbe6f7; }
+    .avviso[hidden] { display: none; }
+    .copia { display: block; width: 100%; margin-top: 12px; padding: 12px; border: 0; border-radius: 12px; background: #e9edf3; color: #111418; font: 700 16px system-ui, sans-serif; }
+    .indirizzo { display: block; margin-top: 8px; font-size: 13px; color: #9aa4b5; word-break: break-all; -webkit-user-select: all; user-select: all; }
     .nota { margin-top: 26px; color: #7c8697; font-size: 14px; }
     a { color: #8fb6ff; }
   </style>
@@ -42,6 +54,12 @@
         <h1>Qui-Auto</h1>
         <p class="sotto">Il salvaschermo di Qui-Parking, con un'icona tutta sua</p>
       </div>
+    </div>
+    <div class="avviso" id="avviso-app" hidden>
+      <b>Sei dentro Qui-Parking installata sulla Home.</b> Da qui il telefono non permette di aggiungere un'altra icona:
+      apri questa pagina nel browser (<b>Safari</b> su iPhone, <b>Chrome</b> su Android) e segui le istruzioni qui sotto.
+      <button class="copia" id="copia" type="button">Copia l'indirizzo da incollare nel browser</button>
+      <span class="indirizzo" id="indirizzo"></span>
     </div>
     <a class="apri" href="./?salvaschermo=1">Apri il salvaschermo</a>
     <button class="installa" id="installa" type="button" hidden>Metti l'icona sulla schermata Home</button>
@@ -62,6 +80,16 @@
     <p class="nota">L'icona apre Qui-Parking già nel salvaschermo: l'auto salvata, le impostazioni e le app per pagare sono le stesse. Tocca lo schermo per passare alla mappa. <a href="./">Torna a Qui-Parking</a></p>
   </main>
   <script>
+    if (window.__dentroApp) {
+      const url = location.origin + location.pathname;
+      document.getElementById("avviso-app").hidden = false;
+      document.getElementById("indirizzo").textContent = url;
+      document.getElementById("copia").addEventListener("click", async () => {
+        const b = document.getElementById("copia");
+        try { await navigator.clipboard.writeText(url); b.textContent = "Indirizzo copiato: incollalo in Safari o Chrome"; }
+        catch (e) { b.textContent = "Tieni premuto l'indirizzo qui sotto e copialo"; }
+      });
+    }
     let invito = null;
     window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); invito = e; document.getElementById("installa").hidden = false; });
     document.getElementById("installa").addEventListener("click", async () => {
