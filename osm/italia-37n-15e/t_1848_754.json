@@ -1,1 +1,1 @@
-{"elements":[{"type":"node","id":2021893588,"tags":{"amenity":"parking","capacity":"40","maxstay":"1 day","parking":"surface"},"lat":36.975261,"lon":15.096587}]}
+{"elements":[{"type":"way","id":1582500352,"tags":{"amenity":"parking","fee":"no","parking":"surface","_postiStimati":"73"},"center":{"lat":36.975268,"lon":15.096542}}]}

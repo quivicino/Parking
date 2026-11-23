@@ -1,1 +1,1 @@
-{"elements":[{"type":"way","id":64844457,"tags":{"amenity":"parking","fee":"no","name":"Piazza dei Caduti sul Lavoro","parking":"surface","_postiStimati":"19"},"center":{"lat":45.575139,"lon":10.341134}}]}
+{"elements":[{"type":"way","id":64844457,"tags":{"amenity":"parking","fee":"no","name":"Piazza dei Caduti sul Lavoro","parking":"surface","_postiStimati":"19"},"center":{"lat":45.575139,"lon":10.341134}},{"type":"way","id":1580443528,"tags":{"amenity":"parking","fee":"no","parking":"street_side"},"center":{"lat":45.577393,"lon":10.349292}}]}
