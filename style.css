@@ -478,3 +478,29 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pallino { flex: none; width: 14px; height: 14px; border-radius: 4px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--bordo); }
 .g-colori { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 6px; font-size: 14px; }
 .g-colori span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---- La tua auto ---- */
+.mk-auto {
+  display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+  background: #111418; color: #fff; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.45);
+}
+.mk-auto svg { width: 22px; height: 22px; }
+.g-segno .mk-auto { width: 32px; height: 32px; }
+.avviso-auto {
+  position: fixed; left: 50%; bottom: calc(176px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  z-index: 2100; display: flex; align-items: center; gap: 12px; max-width: calc(100% - 32px);
+  padding: 8px 8px 8px 12px; border-radius: 14px; background: #111418; color: #fff; box-shadow: var(--ombra);
+  font: 600 16px/1.2 var(--font-body);
+}
+.avviso-auto-icona { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: #111418; flex: none; }
+.avviso-auto button {
+  border: 0; border-radius: 10px; padding: 10px 14px; background: #fff; color: #111418;
+  font: 700 15px var(--font-body); white-space: nowrap;
+}
+.pop .pop-azioni { display: flex; gap: 8px; margin-top: 10px; }
+.pop .pop-azioni button {
+  flex: 1; min-height: 44px; border-radius: 10px; border: 1px solid var(--bordo); background: var(--bg); color: var(--testo);
+  font: 600 15px var(--font-body);
+}
+.icona.auto-mia { background: #111418; color: #fff; border-radius: 50%; }
+.icona.auto-mia svg { width: 22px; height: 22px; }

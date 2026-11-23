@@ -66,6 +66,8 @@
     io: L.layerGroup().addTo(mappa)
   };
   const markerPerId = new Map();
+  // "La tua auto" (sezione più sotto): segnaposto vuoto finché la sezione non è pronta
+  let Auto = { posizione() {}, salva() {}, perElenco() { return null; }, marker() { return null; } };
 
   // Da zoom 17 i singoli stalli, da zoom 18 il numero di posti stimato sulle strade
   const ZOOM_NUMERI_STRADE = 18;
@@ -766,7 +768,7 @@
       </div>
       <div class="voce-dist"><b>${PL.formattaDistanza(l.distanza)}</b><small>${PL.minutiA_piedi(l.distanza)} min a piedi</small></div>`;
     const apri = () => {
-      const m = markerPerId.get(opts.id);
+      const m = markerPerId.get(opts.id) || (opts.id === "auto-mia" ? Auto.marker() : null);
       stato.seguiGps = false;
       mappa.setView([l.lat, l.lon], Math.max(mappa.getZoom(), l.categoria === "strada" ? ZOOM_NUMERI_STRADE : 17));
       if (m) setTimeout(() => m.openPopup(), 250);
@@ -789,6 +791,8 @@
     ol.innerHTML = "";
     const voci = [];
 
+    const mia = Auto.perElenco();
+    if (mia) voci.push({ p: -1, d: 0, el: mia });
     for (const s of segn.filter((x) => x.stato === "libero")) {
       voci.push({ p: 0, d: s.distanza, el: voce(s, {
         id: "segn/" + s.id, classe: "segnalato", icona: "",
@@ -860,6 +864,7 @@
       cerchioPrecisione.setLatLng([lat, lon]).setRadius(acc);
     }
     if (window.QuiBussola) QuiBussola.gps(p.coords);   // cono dell'orientamento (bussola.js)
+    Auto.posizione(p);   // salva da solo il parcheggio (sezione "La tua auto")
     $("btn-libero").disabled = false;
     $("btn-parcheggiato").disabled = false;
     if (stato.seguiGps) impostaCentro(lat, lon, true);
@@ -920,7 +925,10 @@
     }
   }
   $("btn-libero").addEventListener("click", () => segnala("libero"));
-  $("btn-parcheggiato").addEventListener("click", () => segnala("occupato"));
+  $("btn-parcheggiato").addEventListener("click", () => {
+    if (stato.gps) Auto.salva(stato.gps.lat, stato.gps.lon, "manuale");
+    segnala("occupato");
+  });
 
   // ---------- Controlli ----------
   $("btn-centra").addEventListener("click", () => {
@@ -1154,6 +1162,185 @@
 
   $("btn-libero").disabled = true;
   $("btn-parcheggiato").disabled = true;
+
+  // ---------- La tua auto: parcheggio salvato da solo ----------
+  // 1. Con l'app aperta: se si va oltre guidaKmh per almeno guidaSecondi e poi si resta fermi
+  //    (entro sostaMetri) per sostaSecondi, il punto della sosta viene salvato da solo e compare
+  //    "Parcheggio salvato · Annulla".
+  // 2. Alla riapertura: se l'ultima posizione registrata era in auto (da meno di dedottoOre) e ora
+  //    si è fermi o a piedi lì vicino, l'auto viene messa in quell'ultimo punto.
+  // L'utente corregge solo se serve: trascina il segnaposto o usa "Sposta dove sono".
+  Auto = (function () {
+    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000 }, cfg.parcheggioAuto || {});
+    const K_AUTO = "postolibero.auto.posto", K_GUIDA = "postolibero.auto.guida", K_ATTIVO = "postolibero.auto.attivo";
+    const leggi = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
+    const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignora */ } };
+    let attivo = true;
+    try { attivo = localStorage.getItem(K_ATTIVO) !== "0"; } catch (e) { /* ignora */ }
+    let posto = leggi(K_AUTO);          // { lat, lon, t, modo: "auto" | "manuale" | "dedotto" | "corretto" }
+    let precedente = null;              // per "Annulla"
+    let prima = null;                   // fix precedente, per calcolare la velocità
+    let inizioGuida = null, inGuida = false, sosta = null, ultimaScrittura = 0, controllatoAvvio = false;
+    const strato = L.layerGroup().addTo(mappa);
+    let marker = null;
+
+    function velocitaKmh(p) {
+      if (p.coords.speed != null && p.coords.speed >= 0) return p.coords.speed * 3.6;
+      if (!prima) return null;
+      const dt = (p.timestamp - prima.t) / 1000;
+      if (dt < 2) return null;
+      return PL.distanza(prima.lat, prima.lon, p.coords.latitude, p.coords.longitude) / dt * 3.6;
+    }
+
+    function posizione(p) {
+      const lat = p.coords.latitude, lon = p.coords.longitude, t = p.timestamp || Date.now();
+      const v = velocitaKmh(p);
+      if (!controllatoAvvio) { controllatoAvvio = true; deduciAllAvvio(lat, lon, t, v); }
+      if (!attivo) { if (!prima || t - prima.t >= 2000) prima = { lat, lon, t }; return; }
+      if (v != null && v >= C.guidaKmh) {
+        if (inizioGuida == null) inizioGuida = t;
+        if (t - inizioGuida >= C.guidaSecondi * 1000) inGuida = true;
+        sosta = null;
+        if (inGuida && t - ultimaScrittura > 15000) { scrivi(K_GUIDA, { lat, lon, t }); ultimaScrittura = t; }
+      } else if (v != null && v < 6) {
+        if (!inGuida) inizioGuida = null;
+        if (inGuida) {
+          if (!sosta || PL.distanza(sosta.lat, sosta.lon, lat, lon) > C.sostaMetri) sosta = { lat, lon, t };
+          else if (t - sosta.t >= C.sostaSecondi * 1000) {
+            salva(sosta.lat, sosta.lon, "auto");
+            inGuida = false; inizioGuida = null; sosta = null;
+            scrivi(K_GUIDA, null);
+          }
+        }
+      }
+      // il punto di riferimento per la velocità avanza solo ogni 2 secondi o più
+      if (!prima || t - prima.t >= 2000) prima = { lat, lon, t };
+    }
+
+    // Alla riapertura: l'app era stata chiusa mentre si guidava
+    function deduciAllAvvio(lat, lon, t, v) {
+      const g = leggi(K_GUIDA);
+      if (!attivo || !g) return;
+      scrivi(K_GUIDA, null);
+      const recente = t - g.t < C.dedottoOre * 3600000;
+      const giaSalvato = posto && posto.t >= g.t;
+      const vicino = PL.distanza(g.lat, g.lon, lat, lon) <= C.dedottoMetri;
+      const aPiedi = v == null || v < 8;
+      if (recente && !giaSalvato && vicino && aPiedi) salva(g.lat, g.lon, "dedotto");
+    }
+
+    function salva(lat, lon, modo) {
+      precedente = posto;
+      posto = { lat: +lat.toFixed(6), lon: +lon.toFixed(6), t: Date.now(), modo };
+      scrivi(K_AUTO, posto);
+      disegna();
+      if (modo !== "manuale") {
+        avviso(modo === "dedotto" ? "Auto lasciata qui? L'ho segnata sulla mappa" : "Parcheggio salvato", true);
+        if (modo === "auto") parla("Parcheggio salvato");
+      }
+    }
+    function annulla() {
+      posto = precedente; precedente = null;
+      scrivi(K_AUTO, posto);
+      disegna();
+      $("avviso-auto").hidden = true;
+      toast("Parcheggio annullato");
+    }
+    function cancella() {
+      precedente = posto; posto = null;
+      scrivi(K_AUTO, null);
+      mappa.closePopup();
+      disegna();
+      avviso("Auto tolta dalla mappa", true);
+    }
+    function spostaQui() {
+      if (!stato.gps) { toast("Posizione non ancora disponibile."); return; }
+      precedente = posto;
+      posto = { lat: stato.gps.lat, lon: stato.gps.lon, t: Date.now(), modo: "corretto" };
+      scrivi(K_AUTO, posto);
+      mappa.closePopup();
+      disegna();
+      avviso("Auto spostata dove sei", true);
+    }
+
+    let timerAvviso;
+    function avviso(testo, conAnnulla) {
+      $("avviso-auto-testo").textContent = testo;
+      $("avviso-auto-annulla").hidden = !conAnnulla;
+      $("avviso-auto").hidden = false;
+      clearTimeout(timerAvviso);
+      timerAvviso = setTimeout(() => { $("avviso-auto").hidden = true; }, 12000);
+    }
+    function parla(testo) {
+      const s = window.speechSynthesis;
+      if (!s || !suoniAttivi || document.hidden || s.speaking) return;
+      const u = new SpeechSynthesisUtterance(testo);
+      u.lang = "it-IT";
+      const v = vocItaliana();
+      if (v) u.voice = v;
+      s.speak(u);
+    }
+
+    const ICONA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+    const MODI = { auto: "salvata da sola", manuale: "salvata da te", dedotto: "posizione dedotta", corretto: "corretta da te" };
+    const ora = (t) => new Date(t).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+    const giorno = (t) => new Date(t).toDateString() === new Date().toDateString() ? "oggi" : new Date(t).toLocaleDateString("it-IT", { day: "numeric", month: "long" });
+    function testoPopup() {
+      const d = stato.gps ? PL.distanza(stato.gps.lat, stato.gps.lon, posto.lat, posto.lon) : null;
+      const voce = "La tua auto. " + (d != null ? distanzaParlata(d) + ", " + minutiParlati(d) + "." : "");
+      return `<div class="pop" data-voce="${attr(voce)}"><h3>La tua auto</h3>
+        <p>${giorno(posto.t)} alle ${ora(posto.t)} · ${MODI[posto.modo] || ""}</p>
+        ${d != null ? `<p>${PL.formattaDistanza(d)} · ${PL.minutiA_piedi(d)} min a piedi</p>` : ""}
+        <p class="fonte">Non è il posto giusto? Trascina il segnaposto dove hai lasciato l'auto.</p>
+        <a class="pop-vai" href="https://www.google.com/maps/dir/?api=1&destination=${posto.lat},${posto.lon}&travelmode=walking" target="_blank" rel="noopener">Portami all'auto</a>
+        <div class="pop-azioni"><button type="button" data-auto="qui">Sposta dove sono</button><button type="button" data-auto="via">Cancella</button></div></div>`;
+    }
+    function disegna() {
+      strato.clearLayers();
+      marker = null;
+      if (!posto) { render(); return; }
+      marker = L.marker([posto.lat, posto.lon], {
+        icon: L.divIcon({ className: "", html: `<div class="mk-auto">${ICONA}</div>`, iconSize: [38, 38], iconAnchor: [19, 19] }),
+        draggable: true, zIndexOffset: 900, title: "La tua auto", autoPan: true
+      }).bindPopup(testoPopup, OPZ_POPUP).addTo(strato);
+      marker.on("dragend", () => {
+        const ll = marker.getLatLng();
+        precedente = posto;
+        posto = { lat: +ll.lat.toFixed(6), lon: +ll.lng.toFixed(6), t: posto.t, modo: "corretto" };
+        scrivi(K_AUTO, posto);
+        avviso("Posizione dell'auto corretta", true);
+        render();
+      });
+      render();
+    }
+    // pulsanti dentro il riquadro dell'auto
+    mappa.on("popupopen", (e) => {
+      const el = e.popup.getElement && e.popup.getElement();
+      if (!el) return;
+      el.querySelectorAll("[data-auto]").forEach((b) => b.addEventListener("click", () => (b.dataset.auto === "qui" ? spostaQui() : cancella())));
+    });
+    $("avviso-auto-annulla").addEventListener("click", annulla);
+    $("parcheggio-auto").value = attivo ? "1" : "0";
+    $("parcheggio-auto").addEventListener("change", (e) => {
+      attivo = e.target.value === "1";
+      try { localStorage.setItem(K_ATTIVO, attivo ? "1" : "0"); } catch (err) { /* ignora */ }
+      inGuida = false; inizioGuida = null; sosta = null;
+      toast(attivo ? "L'app salverà da sola dove parcheggi" : "Salvataggio del parcheggio spento");
+    });
+
+    function perElenco() {
+      if (!posto) return null;
+      const d = stato.gps ? PL.distanza(stato.gps.lat, stato.gps.lon, posto.lat, posto.lon) : 0;
+      const li = voce({ lat: posto.lat, lon: posto.lon, distanza: d }, {
+        id: "auto-mia", classe: "auto-mia", icona: ICONA, titolo: "La tua auto",
+        meta: [`<span>${giorno(posto.t)} alle ${ora(posto.t)}</span>`, `<span>${MODI[posto.modo] || ""}</span>`]
+      });
+      return li;
+    }
+    setTimeout(disegna, 0);
+    return { posizione, salva, perElenco, marker: () => marker };
+  })();
+
   avviaGps();
   caricaZtl();
 
