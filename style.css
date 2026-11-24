@@ -1,8 +1,9 @@
 /* Layout: mappa a tutto schermo con pulsanti tondi a destra; l'elenco è una pagina a tutto schermo.
    Palette ispirata alla segnaletica stradale italiana: blu del cartello "P". */
 :root {
-  --blu: #1b4f9c;
-  --blu-scuro: #143c78;
+  --blu: #0d0cf2;
+  --blu-scuro: #0a0ab8;
+  --giallo: #f4e80b;
   --libero: #15805a;
   --attenzione: #b87900;
   --pieno: #c23a2f;
@@ -18,7 +19,7 @@
   --font-body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --r: 14px;
   --su-colore: #ffffff;
-  --barra: #1b4f9c;
+  --barra: #0d0cf2;
   /* colori dei segnaposto per tipo di parcheggio */
   --t-aperto: #1b4f9c;
   --t-multipiano: #6a3aa8;
@@ -29,8 +30,9 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --blu: #4f86dc;
-    --blu-scuro: #3a6fc2;
+    --blu: #8a8aff;
+    --blu-scuro: #6c6cf5;
+    --giallo: #f4e80b;
     --libero: #3fbf8a;
     --attenzione: #e3a82d;
     --pieno: #ec6a5f;
@@ -43,7 +45,7 @@
     --bordo: #2a3650;
     --ombra: 0 6px 24px rgba(0, 0, 0, .45);
     --su-colore: #0c1220;
-    --barra: #19386a;
+    --barra: #0a0aa8;
     --t-aperto: #4f86dc;
     --t-multipiano: #9a72d6;
     --t-garage: #2fa8a6;
@@ -603,3 +605,54 @@ body.foglio-aperto .avviso-auto { bottom: auto; top: calc(16px + env(safe-area-i
 /* v46: "Paga la sosta" sempre a portata di mano: pulsante € sulla mappa, foglio sopra mappa e salvaschermo */
 .fab-paga { font: 800 22px/1 var(--font-body); color: #fff; background: #1d6b45; }
 .ss-foglio { position: fixed; z-index: 1990; }
+
+/* ---- v47: colori Qui Parking (blu #0d0cf2 → giallo #f4e80b), logo, pulsante AIUTO AI con menu ---- */
+/* striscia sfumata blu → giallo sotto la barra in alto, come il logo */
+.topbar { border-bottom: 4px solid; border-image: linear-gradient(90deg, #0d0cf2, #f4e80b) 1; }
+.titolo-logo { margin: 0; line-height: 0; }
+.titolo-logo img { height: 30px; width: auto; }
+.titolo-logo .logo-scuro-sfondo { display: none; }
+@media (prefers-color-scheme: dark) {
+  .titolo-logo .logo-chiaro-sfondo { display: none; }
+  .titolo-logo .logo-scuro-sfondo { display: inline; }
+}
+.pill-aiuto {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 58px; padding: 0 16px 0 18px; border: 0; border-radius: 999px;
+  background: linear-gradient(90deg, #0d0cf2 0%, #0d0cf2 52%, #f4e80b 100%); color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.9), var(--ombra);
+  font: 700 19px/1 var(--font-display); letter-spacing: .06em; white-space: nowrap;
+}
+.pill-aiuto .freccina { color: #111418; margin-left: 6px; transition: transform .2s; }
+.pill-aiuto[aria-expanded="true"] .freccina { transform: rotate(180deg); }
+#btn-aiuto { position: absolute; left: 16px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 900; }
+#ss-aiuto { margin-top: 8px; box-shadow: none; }
+.menu-fondo { position: fixed; inset: 0; z-index: 1994; background: rgba(0,0,0,.25); }
+.menu-fondo[hidden], .menu-aiuto[hidden] { display: none; }
+.menu-aiuto {
+  position: fixed; left: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 1995;
+  width: min(320px, calc(100% - 32px)); padding: 8px; border-radius: 18px;
+  background: var(--superficie); color: var(--testo); box-shadow: var(--ombra);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.menu-aiuto.da-salvaschermo { left: 50%; transform: translateX(-50%); background: #14181f; color: #e9edf3; }
+.menu-aiuto button {
+  display: flex; align-items: center; gap: 14px; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px;
+  background: none; color: inherit; font: 600 17px/1.2 var(--font-body); text-align: left;
+}
+.menu-aiuto button:active { background: var(--bg); }
+.menu-aiuto.da-salvaschermo button:active { background: #232a35; }
+.menu-aiuto button:disabled { opacity: .45; }
+.menu-aiuto button[hidden] { display: none; }
+.mi { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; color: #fff; flex: none; font: 700 21px/1 var(--font-body); }
+.mi svg { width: 24px; height: 24px; }
+.mi-rosso { background: var(--pieno); --rosso-icona: var(--pieno); }
+.mi-verde { background: var(--libero); }
+.mi-paga { background: #1d6b45; }
+.mi-nero { background: #111418; box-shadow: inset 0 0 0 2px #3a4252; }
+.g-pill { display: inline-grid; place-items: center; height: 26px; padding: 0 10px; border-radius: 999px;
+  background: linear-gradient(90deg, #0d0cf2 55%, #f4e80b); color: #fff; font: 700 12px var(--font-display); letter-spacing: .06em; }
+/* Elenco: il logo orizzontale sta su una riga sua, i pulsanti sotto */
+.pannello-testa:has(.titolo-logo) { flex-wrap: wrap; row-gap: 10px; }
+.pannello-testa .titolo-logo { flex: 1 0 100%; }
+.titolo-logo img { height: 28px; }

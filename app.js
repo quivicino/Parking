@@ -924,7 +924,8 @@
       toast("Invio non riuscito. Riprova.");
     }
   }
-  $("btn-libero").addEventListener("click", () => segnala("libero"));
+  // "Ho lasciato libero il parcheggio": libera il posto dove era la tua auto; senza auto salvata segnala libero dove sei
+  $("btn-libero").addEventListener("click", () => { if (!Auto.liberaOra()) segnala("libero"); });
   $("btn-parcheggiato").addEventListener("click", () => {
     if (stato.gps) Auto.salva(stato.gps.lat, stato.gps.lon, "manuale");
     segnala("occupato");
@@ -1297,14 +1298,14 @@
       }
     }
     // Ripartenza: toglie l'auto dalla mappa e segnala libero il posto dove era parcheggiata
-    async function lasciaLibero(lat, lon, t) {
+    async function lasciaLibero(lat, lon, t, aMano) {
       const p = posto;
       precedente = p; posto = null; liberato = null;
       scrivi(K_AUTO, null);
       disegna();
-      if (attivo) { inGuida = true; inizioGuida = t; }   // si sta guidando: alla prossima sosta salva di nuovo
+      if (attivo && !aMano) { inGuida = true; inizioGuida = t; }   // si sta guidando: alla prossima sosta salva di nuovo
       const daMinuti = (Date.now() - p.t) / 60000;
-      if (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri) {
+      if (!aMano && (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri)) {
         // sosta troppo breve (un semaforo, una coda) o auto lasciata lontano da qui: nessuna segnalazione
         avviso("Sei ripartito: auto tolta dalla mappa", true);
         return;
@@ -1314,13 +1315,20 @@
         liberato = p;
         stato.miaSegnalazione = { lat: p.lat, lon: p.lon, t: Date.now() };
         stato.ultimaSegnalazione = Date.now();
-        avviso("Sei ripartito: il tuo posto è segnalato libero", true);
+        avviso(aMano ? "Il tuo posto è segnalato libero" : "Sei ripartito: il tuo posto è segnalato libero", true);
         parla("Posto lasciato libero");
         await caricaSegnalazioni();
         render();
       } catch (e) {
         avviso("Sei ripartito: auto tolta dalla mappa (segnalazione non inviata)", true);
       }
+    }
+    // Dal menu "Ho lasciato libero il parcheggio": come la ripartenza, ma a mano e senza i controlli su durata e distanza
+    function liberaOra() {
+      if (!posto) return false;
+      const g = stato.gps;
+      lasciaLibero(g ? g.lat : posto.lat, g ? g.lon : posto.lon, Date.now(), true);
+      return true;
     }
     function annulla() {
       if (precedente && !posto) pausaFino = Date.now() + 30 * 60000;   // annullata una ripartenza: per 30 minuti non ripete
@@ -1430,7 +1438,7 @@
       const recente = Date.now() - ultimaVT < 10000;
       return { posto, attivo, inGuida, v: recente ? ultimaV : null, aPiedi: Date.now() - ultimoPasso < 30000 };
     }
-    return { posizione, salva, perElenco, info, marker: () => marker };
+    return { posizione, salva, perElenco, info, liberaOra, marker: () => marker };
   })();
 
   // ---------- Salvaschermo ----------
@@ -1489,7 +1497,6 @@
       $("ss-ora").textContent = oraDi(Date.now());
       const g = stato.gps, a = Auto.info();
       // "Paga la sosta" quando c'è l'auto salvata e non si sta guidando
-      $("ss-paga").hidden = !!(a.inGuida || (a.v != null && a.v >= 15));   // sempre, tranne mentre si guida
       if (!a.posto && !$("ss-foglio").hidden && !$("ss-da-solo").hidden) chiudiFoglio();   // parcheggio annullato: chiude il foglio aperto da solo
       if (!g) { mostra({ icona: "", grande: "…", sotto: "In attesa della posizione GPS" }); return; }
       const v = a.v;
@@ -1537,7 +1544,7 @@
     }
     function chiudi() {
       if (!aperto) return;
-      chiudiFoglio();
+      chiudiFoglio(); chiudiMenu();
       aperto = false;
       el.hidden = true;
       clearInterval(timer);
@@ -1685,8 +1692,26 @@
       $("ss-da-solo").hidden = true;
       toast("Va bene: «Paga la sosta» si apre solo col pulsante");
     });
-    $("ss-paga").addEventListener("click", (e) => { e.stopPropagation(); apriFoglio(false); });
-    $("btn-paga").addEventListener("click", () => apriFoglio(false));   // pulsante € sulla mappa
+    $("btn-paga").addEventListener("click", () => apriFoglio(false));   // "Pago il parcheggio" nel menu AIUTO AI
+
+    // ---------- Menu AIUTO AI (sulla mappa e nel salvaschermo) ----------
+    function apriMenu(daSalvaschermo) {
+      $("menu-aiuto").classList.toggle("da-salvaschermo", daSalvaschermo);
+      $("btn-salvaschermo").hidden = daSalvaschermo;   // nel salvaschermo non serve
+      $("menu-aiuto").hidden = false; $("menu-fondo").hidden = false;
+      // il menu compare subito sopra il pulsante che lo ha aperto
+      const r = $(daSalvaschermo ? "ss-aiuto" : "btn-aiuto").getBoundingClientRect();
+      $("menu-aiuto").style.bottom = Math.round(window.innerHeight - r.top + 12) + "px";
+      $(daSalvaschermo ? "ss-aiuto" : "btn-aiuto").setAttribute("aria-expanded", "true");
+    }
+    function chiudiMenu() {
+      $("menu-aiuto").hidden = true; $("menu-fondo").hidden = true;
+      $("btn-aiuto").setAttribute("aria-expanded", "false"); $("ss-aiuto").setAttribute("aria-expanded", "false");
+    }
+    $("btn-aiuto").addEventListener("click", () => { $("menu-aiuto").hidden ? apriMenu(false) : chiudiMenu(); });
+    $("ss-aiuto").addEventListener("click", (e) => { e.stopPropagation(); $("menu-aiuto").hidden ? apriMenu(true) : chiudiMenu(); });
+    $("menu-fondo").addEventListener("click", (e) => { e.stopPropagation(); chiudiMenu(); });
+    $("menu-aiuto").addEventListener("click", (e) => { e.stopPropagation(); if (e.target.closest("button")) chiudiMenu(); });
     $("ss-foglio").addEventListener("click", (e) => { e.stopPropagation(); if (e.target === $("ss-foglio")) chiudiFoglio(); });
     $("ss-foglio-chiudi").addEventListener("click", chiudiFoglio);
     $("ss-aggiungi").addEventListener("click", () => {
@@ -1707,8 +1732,8 @@
 
     const tocco = () => { ultimoTocco = Date.now(); };
     ["pointerdown", "keydown", "wheel"].forEach((ev) => document.addEventListener(ev, tocco, { passive: true, capture: true }));
-    el.addEventListener("click", (e) => { if (e.target.closest(".ss-paga, .ss-foglio")) return; e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
-    document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!$("ss-foglio").hidden) chiudiFoglio(); else chiudi(); });
+    el.addEventListener("click", (e) => { if (e.target.closest(".pill-aiuto, .ss-foglio")) return; e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
+    document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!$("menu-aiuto").hidden) chiudiMenu(); else if (!$("ss-foglio").hidden) chiudiFoglio(); else chiudi(); });
     $("btn-salvaschermo").addEventListener("click", () => {
       if (window.QuiBussola) QuiBussola.permesso();   // iPhone: permesso della bussola al tocco
       apri();
