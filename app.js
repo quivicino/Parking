@@ -1697,7 +1697,6 @@
     // ---------- Menu AIUTO AI (sulla mappa e nel salvaschermo) ----------
     function apriMenu(daSalvaschermo) {
       $("menu-aiuto").classList.toggle("da-salvaschermo", daSalvaschermo);
-      $("btn-salvaschermo").hidden = daSalvaschermo;   // nel salvaschermo non serve
       $("menu-aiuto").hidden = false; $("menu-fondo").hidden = false;
       // il menu compare subito sopra il pulsante che lo ha aperto
       const r = $(daSalvaschermo ? "ss-aiuto" : "btn-aiuto").getBoundingClientRect();
@@ -1708,7 +1707,10 @@
       $("menu-aiuto").hidden = true; $("menu-fondo").hidden = true;
       $("btn-aiuto").setAttribute("aria-expanded", "false"); $("ss-aiuto").setAttribute("aria-expanded", "false");
     }
-    $("btn-aiuto").addEventListener("click", () => { $("menu-aiuto").hidden ? apriMenu(false) : chiudiMenu(); });
+    $("btn-aiuto").addEventListener("click", () => {
+      if (window.QuiBussola) QuiBussola.permesso();   // iPhone: permesso della bussola (per la freccia del salvaschermo) al tocco
+      $("menu-aiuto").hidden ? apriMenu(false) : chiudiMenu();
+    });
     $("ss-aiuto").addEventListener("click", (e) => { e.stopPropagation(); $("menu-aiuto").hidden ? apriMenu(true) : chiudiMenu(); });
     $("menu-fondo").addEventListener("click", (e) => { e.stopPropagation(); chiudiMenu(); });
     $("menu-aiuto").addEventListener("click", (e) => { e.stopPropagation(); if (e.target.closest("button")) chiudiMenu(); });
@@ -1734,9 +1736,11 @@
     ["pointerdown", "keydown", "wheel"].forEach((ev) => document.addEventListener(ev, tocco, { passive: true, capture: true }));
     el.addEventListener("click", (e) => { if (e.target.closest(".pill-aiuto, .ss-foglio")) return; e.preventDefault(); e.stopPropagation(); chiudi(); });   // click, non pointerdown: il tocco non arriva ai pulsanti sotto
     document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!$("menu-aiuto").hidden) chiudiMenu(); else if (!$("ss-foglio").hidden) chiudiFoglio(); else chiudi(); });
-    $("btn-salvaschermo").addEventListener("click", () => {
-      if (window.QuiBussola) QuiBussola.permesso();   // iPhone: permesso della bussola al tocco
-      apri();
+    // "Portami all'auto": navigatore a piedi fino all'auto salvata
+    $("btn-portami").addEventListener("click", () => {
+      const a = Auto.info();
+      if (!a.posto) { toast("Non c'è un'auto salvata: usa «Ho parcheggiato qui» quando parcheggi."); return; }
+      window.open("https://www.google.com/maps/dir/?api=1&destination=" + a.posto.lat + "," + a.posto.lon + "&travelmode=walking", "_blank", "noopener");
     });
     // Aperto dall'icona "Qui-Auto" sulla Home o dalla scorciatoia: ./?salvaschermo=1
     try {
