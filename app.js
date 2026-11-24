@@ -1215,7 +1215,7 @@
   //    si è fermi o a piedi lì vicino, l'auto viene messa in quell'ultimo punto.
   // L'utente corregge solo se serve: trascina il segnaposto o usa "Sposta dove sono".
   Auto = (function () {
-    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 50, liberaSecondi: 4, liberaMetri: 3000, liberaDopoMinuti: 3 }, cfg.parcheggioAuto || {});
+    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 3 }, cfg.parcheggioAuto || {});
     const K_AUTO = "postolibero.auto.posto", K_GUIDA = "postolibero.auto.guida", K_ATTIVO = "postolibero.auto.attivo";
     const leggi = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
     const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignora */ } };
@@ -1246,8 +1246,9 @@
       const v = velocitaKmh(p);
       if (v != null) { ultimaV = v; ultimaVT = Date.now(); if (v >= 2 && v < 9) ultimoPasso = Date.now(); }
       if (!controllatoAvvio) { controllatoAvvio = true; deduciAllAvvio(lat, lon, t, v); }
-      // Auto salvata (a mano o da sola) e ora si viaggia oltre i 50 km/h: il posto è stato lasciato
-      if (posto && t > pausaFino && v != null && v >= C.liberaKmh) {
+      // Auto salvata (a mano o da sola) e ora si è a più di 100 m dall'auto e oltre i 10 km/h: il posto è stato lasciato
+      const lontano = posto && PL.distanza(lat, lon, posto.lat, posto.lon) > C.liberaDalPostoMetri;
+      if (posto && t > pausaFino && lontano && v != null && v > C.liberaKmh) {
         if (veloceDa == null) veloceDa = t;
         if (t - veloceDa >= C.liberaSecondi * 1000) { veloceDa = null; lasciaLibero(lat, lon, t); }
       } else if (v != null) veloceDa = null;   // un fix senza velocità non azzera il conteggio
@@ -1488,8 +1489,8 @@
       $("ss-ora").textContent = oraDi(Date.now());
       const g = stato.gps, a = Auto.info();
       // "Paga la sosta" quando c'è l'auto salvata e non si sta guidando
-      $("ss-paga").hidden = !(a.posto && !a.inGuida && !(a.v != null && a.v >= 15));
-      if (!a.posto && !$("ss-foglio").hidden) chiudiFoglio();   // parcheggio annullato: il foglio si chiude
+      $("ss-paga").hidden = !!(a.inGuida || (a.v != null && a.v >= 15));   // sempre, tranne mentre si guida
+      if (!a.posto && !$("ss-foglio").hidden && !$("ss-da-solo").hidden) chiudiFoglio();   // parcheggio annullato: chiude il foglio aperto da solo
       if (!g) { mostra({ icona: "", grande: "…", sotto: "In attesa della posizione GPS" }); return; }
       const v = a.v;
       if (a.inGuida || (v != null && v >= 15)) {
@@ -1685,6 +1686,7 @@
       toast("Va bene: «Paga la sosta» si apre solo col pulsante");
     });
     $("ss-paga").addEventListener("click", (e) => { e.stopPropagation(); apriFoglio(false); });
+    $("btn-paga").addEventListener("click", () => apriFoglio(false));   // pulsante € sulla mappa
     $("ss-foglio").addEventListener("click", (e) => { e.stopPropagation(); if (e.target === $("ss-foglio")) chiudiFoglio(); });
     $("ss-foglio-chiudi").addEventListener("click", chiudiFoglio);
     $("ss-aggiungi").addEventListener("click", () => {

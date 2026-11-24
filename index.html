@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="style.css?v=46">
 </head>
 <body>
   <div class="app">
@@ -73,6 +73,7 @@
         <button class="fab fab-nero" id="btn-salvaschermo" type="button" title="Salvaschermo: distanza e direzione dell'auto" aria-label="Apri il salvaschermo con distanza e direzione dell'auto">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg>
         </button>
+        <button class="fab fab-paga" id="btn-paga" type="button" title="Paga la sosta" aria-label="Paga la sosta">€</button>
         <button class="fab" id="btn-aggiorna" type="button" title="Aggiorna" aria-label="Aggiorna i dati">
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -244,8 +245,8 @@
             <li><span class="g-segno"><span class="btn-help g-help">HELP</span></span><div><b>HELP</b> (in alto nella pagina Elenco, accanto alla X): apre questa pagina.</div></li>
             <li><span class="g-segno"><span class="g-fab verde"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 6.5v7M8.5 10h7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></span></span><div><b>Posto libero qui</b>: segnala agli altri che dove sei c'è un posto libero.</div></li>
             <li><span class="g-segno"><span class="g-fab rosso"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span></span><div><b>Ho parcheggiato</b>: segnala che hai appena occupato il posto dove sei e salva lì <b>la tua auto</b>.</div></li>
-            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span></span><div><b>La tua auto</b> (segnaposto nero): dove hai lasciato l'auto. Se l'app è aperta mentre guidi, quando ti fermi per un paio di minuti salva il posto da sola e in basso compare <b>"Parcheggio salvato · Annulla"</b>. Se avevi chiuso l'app in macchina, alla riapertura a piedi lì vicino prova a capire dove hai lasciato l'auto. Se il punto non è giusto, trascina il segnaposto nel posto vero, oppure toccalo e scegli <b>Sposta dove sono</b>; <b>Portami all'auto</b> apre il navigatore a piedi. Quando riparti e superi i 50 km/h, l'auto sparisce dalla mappa e il posto dove era viene <b>segnalato libero</b> agli altri (non dopo una sosta di pochi minuti); se non eri tu a ripartire, tocca <b>Annulla</b>. Il salvataggio da solo si spegne nella pagina Elenco (SALVA DOVE PARCHEGGIO).</div></li>
-            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg></span></span><div><b>Salvaschermo</b> (pulsante con la luna): schermo nero con scritte grandi, lo schermo resta acceso. Con l'auto salvata mostra una <b>freccia verso l'auto</b>, la distanza e i minuti a piedi; quando arrivi scrive "Sei arrivato". Mentre guidi mostra la velocità e i posti liberi segnalati entro 1 km. Si apre anche <b>da solo dopo 1 minuto senza toccare lo schermo</b>, se stai guidando o stai andando a piedi verso l'auto (si cambia nella pagina Elenco, SALVASCHERMO). Il salvataggio del parcheggio e la segnalazione del posto lasciato libero continuano a funzionare. Con l'auto salvata compare <b>Paga la sosta</b>: mostra EasyPark, MooneyGo, Telepass e UnipolMove (e quelle che aggiungi tu), con in evidenza quelle ammesse nel Comune dove sei, e apre quella che scegli; il pagamento si fa nell'app. Quando l'app salva da sola il parcheggio, questo elenco si apre da solo (si può spegnere con «Non aprire più da solo»). Puoi avere il salvaschermo anche come icona a sé sulla schermata Home (<b>Qui-Auto</b>): apri <a href="salvaschermo.html?istruzioni=1">questa pagina</a> e segui le istruzioni. Tocca lo schermo per tornare alla mappa. L'app deve restare aperta: se blocchi il telefono o passi a un'altra app, il GPS si ferma. Su iPhone, la prima volta consenti l'accesso a "Movimento e orientamento" per la freccia.</div></li>
+            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span></span><div><b>La tua auto</b> (segnaposto nero): dove hai lasciato l'auto. Se l'app è aperta mentre guidi, quando ti fermi per un paio di minuti salva il posto da sola e in basso compare <b>"Parcheggio salvato · Annulla"</b>. Se avevi chiuso l'app in macchina, alla riapertura a piedi lì vicino prova a capire dove hai lasciato l'auto. Se il punto non è giusto, trascina il segnaposto nel posto vero, oppure toccalo e scegli <b>Sposta dove sono</b>; <b>Portami all'auto</b> apre il navigatore a piedi. Quando riparti e ti allontani più di 100 m dall'auto andando oltre i 10 km/h, l'auto sparisce dalla mappa e il posto dove era viene <b>segnalato libero</b> agli altri (non dopo una sosta di pochi minuti); se non eri tu a ripartire, tocca <b>Annulla</b>. Il salvataggio da solo si spegne nella pagina Elenco (SALVA DOVE PARCHEGGIO).</div></li>
+            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg></span></span><div><b>Salvaschermo</b> (pulsante con la luna): schermo nero con scritte grandi, lo schermo resta acceso. Con l'auto salvata mostra una <b>freccia verso l'auto</b>, la distanza e i minuti a piedi; quando arrivi scrive "Sei arrivato". Mentre guidi mostra la velocità e i posti liberi segnalati entro 1 km. Si apre anche <b>da solo dopo 1 minuto senza toccare lo schermo</b>, se stai guidando o stai andando a piedi verso l'auto (si cambia nella pagina Elenco, SALVASCHERMO). Il salvataggio del parcheggio e la segnalazione del posto lasciato libero continuano a funzionare. Il pulsante verde <b>€</b> sulla mappa e <b>Paga la sosta</b> nel salvaschermo (sempre, tranne mentre guidi) aprono l'elenco delle app per pagare: mostra EasyPark, MooneyGo, Telepass e UnipolMove (e quelle che aggiungi tu), con in evidenza quelle ammesse nel Comune dove sei, e apre quella che scegli; il pagamento si fa nell'app. Quando l'app salva da sola il parcheggio, questo elenco si apre da solo (si può spegnere con «Non aprire più da solo»). Puoi avere il salvaschermo anche come icona a sé sulla schermata Home (<b>Qui-Auto</b>): apri <a href="salvaschermo.html?istruzioni=1">questa pagina</a> e segui le istruzioni. Tocca lo schermo per tornare alla mappa. L'app deve restare aperta: se blocchi il telefono o passi a un'altra app, il GPS si ferma. Su iPhone, la prima volta consenti l'accesso a "Movimento e orientamento" per la freccia.</div></li>
           </ul>
           <p>Per ingrandire o rimpicciolire la mappa usa due dita.</p>
         </section>
@@ -335,24 +336,25 @@
       </button>
       <div class="ss-esci">Tocca per tornare alla mappa</div>
     </div>
-    <div class="ss-foglio" id="ss-foglio" hidden>
-      <div class="ss-foglio-box" role="dialog" aria-labelledby="ss-foglio-titolo">
-        <h2 id="ss-foglio-titolo">Paga la sosta</h2>
-        <p class="ss-comune" id="ss-comune">Cerco il Comune…</p>
-        <div class="ss-app-lista" id="ss-app-lista"></div>
-        <p class="ss-altre" id="ss-altre" hidden></p>
-        <form class="ss-nuova" id="ss-nuova" hidden>
-          <label>Nome dell'app <input id="ss-nuova-nome" type="text" maxlength="30" autocomplete="off" required></label>
-          <label>Link (App Store, Play Store o sito) <input id="ss-nuova-link" type="url" placeholder="https://" autocomplete="off" required></label>
-          <div class="ss-foglio-azioni"><button type="submit">Salva</button><button type="button" id="ss-nuova-annulla">Annulla</button></div>
-        </form>
-        <div class="ss-foglio-azioni" id="ss-foglio-azioni">
-          <button type="button" id="ss-aggiungi">+ Aggiungi un'altra app</button>
-          <button type="button" id="ss-foglio-chiudi">Chiudi</button>
-        </div>
-        <p class="ss-nota">Il pagamento si fa nell'app scelta: Qui-Parking la apre soltanto.</p>
-        <p class="ss-nota ss-da-solo" id="ss-da-solo" hidden>Si è aperto da solo perché hai appena parcheggiato. Se la sosta è gratuita, chiudi. <button type="button" id="ss-mai">Non aprire più da solo</button></p>
+  </div>
+
+  <div class="ss-foglio" id="ss-foglio" hidden>
+    <div class="ss-foglio-box" role="dialog" aria-labelledby="ss-foglio-titolo">
+      <h2 id="ss-foglio-titolo">Paga la sosta</h2>
+      <p class="ss-comune" id="ss-comune">Cerco il Comune…</p>
+      <div class="ss-app-lista" id="ss-app-lista"></div>
+      <p class="ss-altre" id="ss-altre" hidden></p>
+      <form class="ss-nuova" id="ss-nuova" hidden>
+        <label>Nome dell'app <input id="ss-nuova-nome" type="text" maxlength="30" autocomplete="off" required></label>
+        <label>Link (App Store, Play Store o sito) <input id="ss-nuova-link" type="url" placeholder="https://" autocomplete="off" required></label>
+        <div class="ss-foglio-azioni"><button type="submit">Salva</button><button type="button" id="ss-nuova-annulla">Annulla</button></div>
+      </form>
+      <div class="ss-foglio-azioni" id="ss-foglio-azioni">
+        <button type="button" id="ss-aggiungi">+ Aggiungi un'altra app</button>
+        <button type="button" id="ss-foglio-chiudi">Chiudi</button>
       </div>
+      <p class="ss-nota">Il pagamento si fa nell'app scelta: Qui-Parking la apre soltanto.</p>
+      <p class="ss-nota ss-da-solo" id="ss-da-solo" hidden>Si è aperto da solo perché hai appena parcheggiato. Se la sosta è gratuita, chiudi. <button type="button" id="ss-mai">Non aprire più da solo</button></p>
     </div>
   </div>
 
@@ -363,12 +365,12 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="config.js?v=45"></script>
+  <script src="config.js?v=46"></script>
   <script src="core.js?v=35"></script>
   <script src="segnalazioni.js?v=34"></script>
-  <script src="app.js?v=45"></script>
+  <script src="app.js?v=46"></script>
   <script src="installa.js?v=35"></script>
-  <script src="bussola.js?v=45"></script>
+  <script src="bussola.js?v=46"></script>
   <!-- Statistiche d'uso anonime, senza cookie: https://parcheggi.goatcounter.com
        I dispositivi del team (segnati una volta aprendo l'app con ?gc_team=nome-dispositivo,
        tolti con ?gc_team=off) contano a parte su https://quivicino-team.goatcounter.com -->
