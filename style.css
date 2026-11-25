@@ -660,18 +660,21 @@ body.foglio-aperto .avviso-auto { bottom: auto; top: calc(16px + env(safe-area-i
 .pannello-testa .titolo-logo { flex: 1 0 100%; }
 .titolo-logo img { height: 28px; }
 
-/* v50: bordino bianco al campo "Cerca un indirizzo"; pulsante "Attività" con sfondo trasparente */
+/* v50-v51: bordino bianco al campo "Cerca un indirizzo"; pulsante "Attività" con sfondo trasparente */
 .cerca input { box-shadow: 0 0 0 2px rgba(255,255,255,.9); }
+/* sulla mappa (tema chiaro): azzurro semitrasparente, scritta bianca */
 .pill-aiuto {
-  background: transparent; color: var(--blu);
+  background: rgba(30, 136, 255, .62); color: #fff;
   box-shadow: 0 0 0 2px rgba(255,255,255,.95), 0 2px 10px rgba(0,0,0,.18);
-  text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 10px rgba(255,255,255,.9);
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
 }
-.pill-aiuto .freccina { color: var(--blu); filter: drop-shadow(0 0 2px #fff); }
+.pill-aiuto .freccina { color: #fff; }
+/* tema scuro: trasparente come nella prima anteprima */
 @media (prefers-color-scheme: dark) {
-  .pill-aiuto { color: #fff; text-shadow: 0 0 3px #000, 0 0 8px rgba(0,0,0,.9); }
+  .pill-aiuto { background: transparent; color: #fff; text-shadow: 0 0 3px #000, 0 0 8px rgba(0,0,0,.9); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .pill-aiuto .freccina { color: #fff; filter: drop-shadow(0 0 2px #000); }
 }
 /* nel salvaschermo (sfondo nero) scritta bianca */
-#ss-aiuto { color: #fff; text-shadow: none; box-shadow: 0 0 0 2px rgba(255,255,255,.95); }
+#ss-aiuto { background: transparent; color: #fff; text-shadow: none; box-shadow: 0 0 0 2px rgba(255,255,255,.95); -webkit-backdrop-filter: none; backdrop-filter: none; }
 #ss-aiuto .freccina { color: #fff; filter: none; }
