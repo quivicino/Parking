@@ -670,11 +670,7 @@ body.foglio-aperto .avviso-auto { bottom: auto; top: calc(16px + env(safe-area-i
   -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
 }
 .pill-aiuto .freccina { color: #fff; }
-/* tema scuro: trasparente come nella prima anteprima */
-@media (prefers-color-scheme: dark) {
-  .pill-aiuto { background: transparent; color: #fff; text-shadow: 0 0 3px #000, 0 0 8px rgba(0,0,0,.9); -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .pill-aiuto .freccina { color: #fff; filter: drop-shadow(0 0 2px #000); }
-}
+/* v52: azzurro semitrasparente sulla mappa anche col tema scuro (il telefono di Paolo usa il tema scuro) */
 /* nel salvaschermo (sfondo nero) scritta bianca */
 #ss-aiuto { background: transparent; color: #fff; text-shadow: none; box-shadow: 0 0 0 2px rgba(255,255,255,.95); -webkit-backdrop-filter: none; backdrop-filter: none; }
 #ss-aiuto .freccina { color: #fff; filter: none; }
