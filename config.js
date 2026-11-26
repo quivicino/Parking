@@ -4,7 +4,7 @@
  */
 window.POSTOLIBERO_CONFIG = {
   // Versione dell'app, mostrata in fondo alla pagina Elenco. Aumentala a ogni aggiornamento.
-  versione: "54",
+  versione: "55",
 
   // Raggio di ricerca iniziale in metri (modificabile anche dall'app)
   raggioMetri: 1000,
@@ -73,7 +73,7 @@ window.POSTOLIBERO_CONFIG = {
       "mantova": { app: ["easypark", "mooneygo", "telepass"], altre: ["APCOA Flow", "ParkingMyCar", "Tap&Park"] }
     }
   },
-  parcheggioAuto: { guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 3 },
+  parcheggioAuto: { guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 2, precisioneMax: 20 },
   // Ripartenza: a più di liberaDalPostoMetri dall'auto salvata e oltre liberaKmh (per liberaSecondi) il posto diventa libero.
   // liberaDopoMinuti: non per soste più brevi (semaforo, coda); liberaMetri: non se l'auto è più lontana di così.
 

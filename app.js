@@ -1338,7 +1338,7 @@
   Registro.evento("avvio app (versione " + (cfg.versione || "") + ")");
 
   Auto = (function () {
-    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 3 }, cfg.parcheggioAuto || {});
+    const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 2, precisioneMax: 20 }, cfg.parcheggioAuto || {});
     const K_AUTO = "postolibero.auto.posto", K_GUIDA = "postolibero.auto.guida", K_ATTIVO = "postolibero.auto.attivo";
     const leggi = (k) => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
     const scrivi = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignora */ } };
@@ -1387,9 +1387,13 @@
       } else if (v != null && v < 6) {
         if (!inGuida) inizioGuida = null;
         if (inGuida) {
-          if (!sosta || PL.distanza(sosta.lat, sosta.lon, lat, lon) > C.sostaMetri) sosta = { lat, lon, t };
+          // v55: le posizioni poco precise (garage, palazzi: ±20 m e oltre) non spostano il punto della sosta,
+          // altrimenti l'auto viene salvata dove il GPS "salta" invece che dove si è fermata
+          const precisa = !(p.coords.accuracy > C.precisioneMax);
+          if (!sosta) { if (precisa) sosta = { lat, lon, t }; }
+          else if (precisa && PL.distanza(sosta.lat, sosta.lon, lat, lon) > C.sostaMetri) sosta = { lat, lon, t };
           else if (t - sosta.t >= C.sostaSecondi * 1000) {
-            salva(sosta.lat, sosta.lon, "auto");
+            salva(sosta.lat, sosta.lon, "auto", sosta.t);
             inGuida = false; inizioGuida = null; sosta = null;
             scrivi(K_GUIDA, null);
           }
@@ -1429,9 +1433,10 @@
       if (recente && !giaSalvato && vicino && aPiedi) salva(g.lat, g.lon, "dedotto");
     }
 
-    function salva(lat, lon, modo) {
+    function salva(lat, lon, modo, dal) {
       precedente = posto; liberato = null; pausaFino = 0;
-      posto = { lat: +lat.toFixed(6), lon: +lon.toFixed(6), t: Date.now(), modo };
+      // dal = quando l'auto si è fermata (per il salvataggio da solo è 90 s prima del salvataggio)
+      posto = { lat: +lat.toFixed(6), lon: +lon.toFixed(6), t: Date.now(), dal: dal || Date.now(), modo };
       scrivi(K_AUTO, posto);
       Registro.evento("auto salvata (" + modo + ")", datiRegistro());
       disegna();
@@ -1448,7 +1453,7 @@
       scrivi(K_AUTO, null);
       disegna();
       if (attivo && !aMano) { inGuida = true; inizioGuida = t; }   // si sta guidando: alla prossima sosta salva di nuovo
-      const daMinuti = (Date.now() - p.t) / 60000;
+      const daMinuti = (Date.now() - (p.dal || p.t)) / 60000;   // v55: durata della sosta da quando l'auto si è fermata
       if (!aMano && (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri)) {
         // sosta troppo breve (un semaforo, una coda) o auto lasciata lontano da qui: nessuna segnalazione
         Registro.evento("ripartenza: auto tolta senza segnalare (" + (daMinuti < C.liberaDopoMinuti ? "sosta di " + daMinuti.toFixed(1) + " min" : "auto a " + Math.round(PL.distanza(p.lat, p.lon, lat, lon)) + " m") + ")", datiRegistro());
