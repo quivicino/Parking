@@ -687,3 +687,64 @@ body.foglio-aperto .avviso-auto { bottom: auto; top: calc(16px + env(safe-area-i
 .registro-testa { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
 .registro-testa button { border: 0; border-radius: 10px; padding: 8px 14px; background: var(--bg); color: var(--testo); font: 600 14px var(--font-body); }
 .registro-box pre { margin: 0; overflow: auto; font: 12px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+
+/* ---- v54: grafica di Paolo (immagine "Qui Parking PC / SMARTPHONE") ---- */
+.topbar { background: linear-gradient(90deg, #070586 0%, #c4bb02 100%); }
+.brand-name { font: 700 19px/1 var(--font-display); color: #fff; }
+.cerca input, .raggio select, .filtri-btn { background: rgba(255,255,255,.26); box-shadow: none; color: #fff; }
+.cerca input { text-align: center; }
+.cerca input::placeholder { color: rgba(255,255,255,.95); }
+.raggio select { font-weight: 600; }
+.filtri-btn { width: auto; padding: 0 10px 0 12px; display: inline-flex; align-items: center; gap: 4px; font: 600 15px/1 var(--font-body); }
+.filtri-freccia { flex: none; }
+.filtri-num { top: -7px; right: -7px; background: #ff2020; border: 0; min-width: 20px; height: 20px; border-radius: 10px; font: 700 11px/20px var(--font-body); }
+/* pulsante Azioni: sfumatura blu → giallo, scritta bianca */
+.pill-aiuto {
+  height: 50px; padding: 0 16px 0 22px; gap: 8px;
+  background: linear-gradient(90deg, #0e1188 0%, #0e1188 30%, #d5d215 100%); color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.28); text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  font: 700 18px/1 var(--font-display); letter-spacing: .03em;
+}
+.pill-aiuto .freccina { color: #fff; filter: drop-shadow(0 1px 1px rgba(0,0,0,.4)); }
+#btn-aiuto { bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+/* nel salvaschermo resta trasparente con il bordino bianco */
+#ss-aiuto { background: transparent; box-shadow: 0 0 0 2px rgba(255,255,255,.95); text-shadow: none; }
+/* la tua posizione: pallino blu pieno */
+.io { width: 22px; height: 22px; background: #0306ff; box-shadow: 0 0 0 8px rgba(3,6,255,.18); }
+.io { margin: -2px; }
+/* con filtri attivi resta trasparente (il numerino rosso basta); bianco solo col menu aperto */
+.filtri-btn.attivi { background: rgba(255,255,255,.26); color: #fff; }
+.filtri-btn[aria-expanded="true"] { background: #fff; color: var(--blu); }
+@media (max-width: 480px) {
+  .topbar { gap: 6px; padding-left: 10px; padding-right: 10px; }
+  .cerca input { padding: 0 4px; font-size: 14px; }
+  .filtri-btn { padding: 0 6px 0 8px; font-size: 14px; }
+  .raggio select { font-size: 14px; padding-left: 8px; padding-right: 4px; }
+}
+/* v54, ritocchi dalla foto dello smartphone: azzurro al centro della barra, campi "vetro" con scritte grandi in grassetto, frecce spesse */
+.topbar { background: linear-gradient(90deg, #070586 0%, #0b3a9e 24%, #4f8fc4 50%, #9ea96c 70%, #c4bb02 100%); }
+.cerca input, .raggio select, .filtri-btn {
+  height: 40px; border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,.40), rgba(255,255,255,.20));
+  border: 1px solid rgba(255,255,255,.35);
+  color: #fff; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.cerca input { font-size: 16px; }
+.cerca input::placeholder { color: #fff; font-weight: 700; }
+.filtri-btn { font-size: 16px; }
+.filtri-freccia { width: 18px; height: 18px; }
+.raggio select {
+  -webkit-appearance: none; appearance: none; font-size: 16px; padding: 0 30px 0 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center / 18px,
+              linear-gradient(180deg, rgba(255,255,255,.40), rgba(255,255,255,.20));
+}
+.filtri-btn.attivi { background: linear-gradient(180deg, rgba(255,255,255,.40), rgba(255,255,255,.20)); color: #fff; }
+.filtri-btn[aria-expanded="true"] { background: #fff; color: var(--blu); text-shadow: none; }
+.filtri-num { background: #e8261a; }
+.cerca input:focus { background: #fff; color: #172033; text-shadow: none; }
+@media (max-width: 480px) {
+  .cerca input { font-size: 15px; padding: 0 4px; }
+  .filtri-btn { font-size: 15px; padding: 0 6px 0 9px; }
+  .raggio select { font-size: 15px; padding: 0 26px 0 9px; background-position: right 6px center, 0 0; }
+}

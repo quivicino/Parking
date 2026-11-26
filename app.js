@@ -958,7 +958,7 @@
   function aggiornaFiltri() {
     stato.filtri = new Set(caselleFiltri.filter((c) => !c.checked).map((c) => c.dataset.voce));
     const n = caselleFiltri.filter((c) => c.checked !== INIZIALE.get(c.dataset.voce)).length;
-    $("filtri-num").textContent = n;
+    $("filtri-num").textContent = "+" + n;
     $("filtri-num").hidden = n === 0;
     $("btn-filtri").classList.toggle("attivi", n > 0);
     $("filtri-azzera").disabled = n === 0;

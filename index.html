@@ -13,23 +13,22 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=53">
+  <link rel="stylesheet" href="style.css?v=54">
 </head>
 <body>
   <div class="app">
     <header class="topbar">
       <div class="brand" aria-label="Qui-Parking">
         <img class="logo" src="icon-192.png" alt="" width="50" height="50">
-        <span class="brand-name">Qui-Parking</span>
+        <span class="brand-name">Qui Parking</span>
       </div>
       <form class="cerca" id="form-cerca" role="search">
         <label for="cerca-indirizzo" class="sr-only">Cerca un indirizzo</label>
-        <input id="cerca-indirizzo" type="search" placeholder="Cerca un indirizzo…" autocomplete="off" enterkeyhint="search">
+        <input id="cerca-indirizzo" type="search" placeholder="Cerca indirizzo" autocomplete="off" enterkeyhint="search">
       </form>
       <div class="filtri-menu" id="filtri-menu">
         <button class="filtri-btn" id="btn-filtri" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="filtri-lista" title="Filtri">
-          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.6V19l-4 2v-8.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-          <span class="sr-only">Filtri</span>
+          <span class="filtri-testo">Filtra</span><svg class="filtri-freccia" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span class="filtri-num" id="filtri-num" hidden></span>
         </button>
         <div class="filtri-lista" id="filtri-lista" role="group" aria-label="Filtri" hidden>
@@ -75,7 +74,7 @@
         </button>
       </div>
 
-      <button class="pill-aiuto" id="btn-aiuto" type="button" aria-haspopup="menu" aria-expanded="false"><span>Attività</span><svg class="freccina" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="pill-aiuto" id="btn-aiuto" type="button" aria-haspopup="menu" aria-expanded="false"><span>Azioni</span><svg class="freccina" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </main>
 
     <section class="pannello" id="pannello" aria-label="Posti vicini" hidden>
@@ -241,16 +240,16 @@
         <section id="g-pulsanti">
           <h3>I pulsanti</h3>
           <ul class="g-lista">
-            <li><span class="g-segno"><span class="g-barra">Cerca un indirizzo…</span></span><div><b>Cerca</b>: scrivi una via o una piazza per vedere i parcheggi lì invece che intorno a te.</div></li>
+            <li><span class="g-segno"><span class="g-barra">Cerca indirizzo</span></span><div><b>Cerca</b>: scrivi una via o una piazza per vedere i parcheggi lì invece che intorno a te.</div></li>
             <li><span class="g-segno"><span class="g-fab"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.6V19l-4 2v-8.4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span></span><div><b>Tipi di parcheggio</b> (imbuto in alto, accanto al raggio): apre un menu con i tipi da mostrare, tutti spuntati all'inizio: aree di sosta all'aperto, multipiano e interrati, garage e posti coperti, sosta su strada, stalli per disabili, posti liberi segnalati e in tempo reale; sotto, la tariffa: gratuiti e a pagamento. Togli la spunta a quello che non ti interessa (anche più voci insieme): un parcheggio si vede se il suo tipo e la sua tariffa sono spuntati; quelli con tariffa non indicata si vedono finché almeno una delle due tariffe è spuntata. In fondo c'è <b>Dentro le ZTL e le aree pedonali</b>: all'inizio è senza spunta, quindi i parcheggi raggiungibili solo con il contrassegno non si vedono; spuntala se ce l'hai. Il numerino arancione dice quante voci hai cambiato rispetto all'inizio; <b>Torna alle scelte iniziali</b> rimette tutto com'era.</div></li>
             <li><span class="g-segno"><span class="g-barra corto">1 km</span></span><div><b>Raggio</b>: quanto lontano cercare, 200 m, 500 m, 1 km o 2 km.</div></li>
             <li><span class="g-segno"><span class="g-fab"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></span></span><div><b>Posizione</b>: riporta la mappa su di te e la fa seguire mentre ti sposti.</div></li>
             <li><span class="g-segno"><span class="g-fab nero"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="4.5" cy="6" r="1.6" fill="currentColor"/><circle cx="4.5" cy="12" r="1.6" fill="currentColor"/><circle cx="4.5" cy="18" r="1.6" fill="currentColor"/></svg></span></span><div><b>Elenco</b>: apre la pagina con tutti i posti vicini e le impostazioni. Il numerino verde indica quanti posti sono sicuramente liberi.</div></li>
             <li><span class="g-segno"><span class="g-fab"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span><div><b>Aggiorna</b>: riscarica subito tutti i dati.</div></li>
             <li><span class="g-segno"><span class="btn-help g-help">HELP</span></span><div><b>HELP</b> (in alto nella pagina Elenco, accanto alla X): apre questa pagina.</div></li>
-            <li><span class="g-segno"><span class="g-pill">Attività</span></span><div><b>Attività</b> (pulsante in basso a sinistra, anche nel salvaschermo): apre il menu con <b>Ho parcheggiato qui</b> (segna occupato il posto dove sei e salva lì <b>la tua auto</b>), <b>Ho lasciato libero il parcheggio</b> (segnala libero il posto dove era la tua auto, oppure quello dove sei se l'auto non è salvata), <b>Pago il parcheggio</b> (apre le app per pagare la sosta) e <b>Portami all'auto</b> (il navigatore a piedi fino alla tua auto).</div></li>
+            <li><span class="g-segno"><span class="g-pill">Azioni</span></span><div><b>Azioni</b> (pulsante in basso a sinistra, anche nel salvaschermo): apre il menu con <b>Ho parcheggiato qui</b> (segna occupato il posto dove sei e salva lì <b>la tua auto</b>), <b>Ho lasciato libero il parcheggio</b> (segnala libero il posto dove era la tua auto, oppure quello dove sei se l'auto non è salvata), <b>Pago il parcheggio</b> (apre le app per pagare la sosta) e <b>Portami all'auto</b> (il navigatore a piedi fino alla tua auto).</div></li>
             <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span></span><div><b>La tua auto</b> (segnaposto nero): dove hai lasciato l'auto. Se l'app è aperta mentre guidi, quando ti fermi per un paio di minuti salva il posto da sola e in basso compare <b>"Parcheggio salvato · Annulla"</b>. Se avevi chiuso l'app in macchina, alla riapertura a piedi lì vicino prova a capire dove hai lasciato l'auto. Se il punto non è giusto, trascina il segnaposto nel posto vero, oppure toccalo e scegli <b>Sposta dove sono</b>; <b>Portami all'auto</b> apre il navigatore a piedi. Quando riparti e ti allontani più di 100 m dall'auto andando oltre i 10 km/h, l'auto sparisce dalla mappa e il posto dove era viene <b>segnalato libero</b> agli altri (non dopo una sosta di pochi minuti); se non eri tu a ripartire, tocca <b>Annulla</b>. Il salvataggio da solo si spegne nella pagina Elenco (SALVA DOVE PARCHEGGIO).</div></li>
-            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg></span></span><div><b>Salvaschermo</b> (si apre da solo dopo 1 minuto senza tocchi mentre guidi o vai verso l'auto, oppure dall'icona Qui-Auto): schermo nero con scritte grandi, lo schermo resta acceso. Con l'auto salvata mostra una <b>freccia verso l'auto</b>, la distanza e i minuti a piedi; quando arrivi scrive "Sei arrivato". Mentre guidi mostra la velocità e i posti liberi segnalati entro 1 km. Si apre anche <b>da solo dopo 1 minuto senza toccare lo schermo</b>, se stai guidando o stai andando a piedi verso l'auto (si cambia nella pagina Elenco, SALVASCHERMO). Il salvataggio del parcheggio e la segnalazione del posto lasciato libero continuano a funzionare. <b>Pago il parcheggio</b> nel menu <b>Attività</b> apre l'elenco delle app per pagare: mostra EasyPark, MooneyGo, Telepass e UnipolMove (e quelle che aggiungi tu), con in evidenza quelle ammesse nel Comune dove sei, e apre quella che scegli; il pagamento si fa nell'app. Quando l'app salva da sola il parcheggio, questo elenco si apre da solo (si può spegnere con «Non aprire più da solo»). Puoi avere il salvaschermo anche come icona a sé sulla schermata Home (<b>Qui-Auto</b>): apri <a href="salvaschermo.html?istruzioni=1">questa pagina</a> e segui le istruzioni. Tocca lo schermo per tornare alla mappa. L'app deve restare aperta: se blocchi il telefono o passi a un'altra app, il GPS si ferma. Su iPhone, la prima volta consenti l'accesso a "Movimento e orientamento" per la freccia.</div></li>
+            <li><span class="g-segno"><span class="mk-auto"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg></span></span><div><b>Salvaschermo</b> (si apre da solo dopo 1 minuto senza tocchi mentre guidi o vai verso l'auto, oppure dall'icona Qui-Auto): schermo nero con scritte grandi, lo schermo resta acceso. Con l'auto salvata mostra una <b>freccia verso l'auto</b>, la distanza e i minuti a piedi; quando arrivi scrive "Sei arrivato". Mentre guidi mostra la velocità e i posti liberi segnalati entro 1 km. Si apre anche <b>da solo dopo 1 minuto senza toccare lo schermo</b>, se stai guidando o stai andando a piedi verso l'auto (si cambia nella pagina Elenco, SALVASCHERMO). Il salvataggio del parcheggio e la segnalazione del posto lasciato libero continuano a funzionare. <b>Pago il parcheggio</b> nel menu <b>Azioni</b> apre l'elenco delle app per pagare: mostra EasyPark, MooneyGo, Telepass e UnipolMove (e quelle che aggiungi tu), con in evidenza quelle ammesse nel Comune dove sei, e apre quella che scegli; il pagamento si fa nell'app. Quando l'app salva da sola il parcheggio, questo elenco si apre da solo (si può spegnere con «Non aprire più da solo»). Puoi avere il salvaschermo anche come icona a sé sulla schermata Home (<b>Qui-Auto</b>): apri <a href="salvaschermo.html?istruzioni=1">questa pagina</a> e segui le istruzioni. Tocca lo schermo per tornare alla mappa. L'app deve restare aperta: se blocchi il telefono o passi a un'altra app, il GPS si ferma. Su iPhone, la prima volta consenti l'accesso a "Movimento e orientamento" per la freccia.</div></li>
           </ul>
           <p>Per ingrandire o rimpicciolire la mappa usa due dita.</p>
         </section>
@@ -334,7 +333,7 @@
         <div class="ss-sotto" id="ss-sotto"></div>
       </div>
       <div class="ss-stato" id="ss-stato"></div>
-      <button class="pill-aiuto" id="ss-aiuto" type="button" aria-haspopup="menu" aria-expanded="false"><span>Attività</span><svg class="freccina" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="pill-aiuto" id="ss-aiuto" type="button" aria-haspopup="menu" aria-expanded="false"><span>Azioni</span><svg class="freccina" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="ss-esci">Tocca per tornare alla mappa</div>
     </div>
   </div>
@@ -381,12 +380,12 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="config.js?v=53"></script>
+  <script src="config.js?v=54"></script>
   <script src="core.js?v=35"></script>
   <script src="segnalazioni.js?v=34"></script>
-  <script src="app.js?v=53"></script>
+  <script src="app.js?v=54"></script>
   <script src="installa.js?v=35"></script>
-  <script src="bussola.js?v=53"></script>
+  <script src="bussola.js?v=54"></script>
   <!-- Statistiche d'uso anonime, senza cookie: https://parcheggi.goatcounter.com
        I dispositivi del team (segnati una volta aprendo l'app con ?gc_team=nome-dispositivo,
        tolti con ?gc_team=off) contano a parte su https://quivicino-team.goatcounter.com -->
