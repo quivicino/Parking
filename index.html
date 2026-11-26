@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=49">
+  <link rel="stylesheet" href="style.css?v=53">
 </head>
 <body>
   <div class="app">
@@ -152,6 +152,22 @@
           </select>
         </label>
         <a class="riga-home" href="salvaschermo.html?istruzioni=1">Icona del salvaschermo sulla schermata Home (Qui&#8209;Auto)&nbsp;›</a>
+
+        <div class="registro-sezione" id="registro-sezione" hidden>
+          <label class="auto" for="registro-attivo">
+            <span>REGISTRO DI PROVA</span>
+            <select id="registro-attivo">
+              <option value="1">Attivo</option>
+              <option value="0">Spento</option>
+            </select>
+          </label>
+          <div class="registro-azioni">
+            <span id="registro-conta">0 righe</span>
+            <button type="button" id="registro-vedi">Vedi</button>
+            <button type="button" id="registro-condividi">Invia</button>
+            <button type="button" id="registro-cancella">Cancella</button>
+          </div>
+        </div>
 
         <label class="auto" for="lettura" id="riga-lettura">
           <span>LETTURA VOCALE</span>
@@ -343,6 +359,13 @@
     </div>
   </div>
 
+  <div class="registro-vista" id="registro-vista" hidden>
+    <div class="registro-box">
+      <div class="registro-testa"><b>Registro di prova · ultime righe</b><button type="button" id="registro-chiudi">Chiudi</button></div>
+      <pre id="registro-testo"></pre>
+    </div>
+  </div>
+
   <div class="menu-fondo" id="menu-fondo" hidden></div>
   <div class="menu-aiuto" id="menu-aiuto" role="menu" hidden>
     <button type="button" role="menuitem" id="btn-parcheggiato"><span class="mi mi-rosso"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M5 16.5V12l1.8-4.6A2 2 0 0 1 8.7 6h6.6a2 2 0 0 1 1.9 1.4L19 12v4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 12.2h16v4.3H4z" fill="currentColor"/><path d="M6.5 16.5v2M17.5 16.5v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="7.5" cy="14.3" r="1.1" fill="var(--rosso-icona)"/><circle cx="16.5" cy="14.3" r="1.1" fill="var(--rosso-icona)"/></svg></span><span>Ho parcheggiato qui</span></button>
@@ -358,12 +381,12 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="config.js?v=49"></script>
+  <script src="config.js?v=53"></script>
   <script src="core.js?v=35"></script>
   <script src="segnalazioni.js?v=34"></script>
-  <script src="app.js?v=49"></script>
+  <script src="app.js?v=53"></script>
   <script src="installa.js?v=35"></script>
-  <script src="bussola.js?v=49"></script>
+  <script src="bussola.js?v=53"></script>
   <!-- Statistiche d'uso anonime, senza cookie: https://parcheggi.goatcounter.com
        I dispositivi del team (segnati una volta aprendo l'app con ?gc_team=nome-dispositivo,
        tolti con ?gc_team=off) contano a parte su https://quivicino-team.goatcounter.com -->

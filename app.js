@@ -870,6 +870,7 @@
     if (stato.seguiGps) impostaCentro(lat, lon, true);
   }
 
+  let ultimoErroreGps = { c: 0, t: 0 };
   function erroreGps(e) {
     const testi = {
       1: "Posizione non autorizzata. Consenti l'accesso alla posizione oppure cerca un indirizzo.",
@@ -877,6 +878,8 @@
       3: "Il GPS non risponde. Cerca un indirizzo qui sopra."
     };
     if (!stato.gps) messaggio(testi[e.code] || testi[2], true);
+    // nel registro al massimo una riga al minuto per lo stesso errore
+    try { if (e.code !== ultimoErroreGps.c || Date.now() - ultimoErroreGps.t > 60000) { ultimoErroreGps = { c: e.code, t: Date.now() }; Registro.evento("errore GPS " + e.code + (e.code === 1 ? " (posizione negata)" : e.code === 3 ? " (tempo scaduto)" : " (posizione non disponibile)")); } } catch (err) { /* registro non ancora pronto */ }
   }
 
   function avviaGps() {
@@ -1234,6 +1237,106 @@
   // 2. Alla riapertura: se l'ultima posizione registrata era in auto (da meno di dedottoOre) e ora
   //    si è fermi o a piedi lì vicino, l'auto viene messa in quell'ultimo punto.
   // L'utente corregge solo se serve: trascina il segnaposto o usa "Sposta dove sono".
+  // ---------- Registro di prova (solo per chi lo attiva, resta sul telefono) ----------
+  // Ogni 10 secondi scrive posizione, precisione, velocità e stato (in moto / sosta / parcheggiata),
+  // più gli eventi (auto salvata, ripartenza, posto libero inviato, Annulla, app in secondo piano...).
+  // È nascosto: si mostra e si attiva toccando 7 volte "Versione …" in fondo alla pagina Elenco
+  // (o aprendo l'app con ?registro=1). I dati restano in questo telefono finché non si tocca "Invia".
+  const Registro = (function () {
+    const K = "postolibero.registro", K_ON = "postolibero.registro.attivo", MAX = 3000;
+    let righe = [];
+    try { righe = JSON.parse(localStorage.getItem(K) || "[]"); } catch (e) { righe = []; }
+    let acceso = false;
+    try { acceso = localStorage.getItem(K_ON) === "1"; } catch (e) { /* ignora */ }
+    let daSalvare = false;
+    function salva() {
+      if (!daSalvare) return;
+      daSalvare = false;
+      try { localStorage.setItem(K, JSON.stringify(righe)); }
+      catch (e) { righe = righe.slice(-1000); try { localStorage.setItem(K, JSON.stringify(righe)); } catch (e2) { /* ignora */ } }
+    }
+    setInterval(salva, 30000);
+    window.addEventListener("pagehide", salva);
+    const due = (n) => String(n).padStart(2, "0");
+    const ora = (t) => { const d = new Date(t); return `${d.getFullYear()}-${due(d.getMonth() + 1)}-${due(d.getDate())} ${due(d.getHours())}:${due(d.getMinutes())}:${due(d.getSeconds())}`; };
+    function aggiungi(r, subito) {
+      if (!acceso) return;
+      righe.push(r);
+      if (righe.length > MAX) righe.splice(0, righe.length - MAX);
+      daSalvare = true;
+      if (subito) salva();
+      conta();
+    }
+    // d: { lat, lon, acc, v, fonte, stato, auto, dist }
+    function riga(d) {
+      const n = (x, k) => (x == null || !isFinite(x)) ? "" : +(+x).toFixed(k);
+      aggiungi([Date.now(), n(d.lat, 6), n(d.lon, 6), n(d.acc, 0), n(d.v, 1), d.fonte || "", d.stato || "", d.auto || "", n(d.dist, 0), d.evento || ""], !!d.evento);
+    }
+    function evento(testo, d) { riga(Object.assign({}, d || {}, { evento: testo })); }
+    const INTESTA = "ora;lat;lon;precisione_m;velocita_kmh;fonte_velocita;stato;auto;distanza_auto_m;evento";
+    function csv() { return INTESTA + "\n" + righe.map((r) => [ora(r[0])].concat(r.slice(1)).map((x) => String(x).replace(/;/g, ",")).join(";")).join("\n"); }
+    function conta() { const el = $("registro-conta"); if (el) el.textContent = righe.length + (righe.length === 1 ? " riga" : " righe"); }
+
+    // ---- interfaccia nella pagina Elenco (nascosta finché non la si attiva) ----
+    function mostraSezione(si) { $("registro-sezione").hidden = !si; }
+    function imposta(si) {
+      acceso = si;
+      try { localStorage.setItem(K_ON, si ? "1" : "0"); } catch (e) { /* ignora */ }
+      $("registro-attivo").value = si ? "1" : "0";
+      if (si) evento("registro acceso");
+    }
+    mostraSezione(acceso);
+    $("registro-attivo").value = acceso ? "1" : "0";
+    conta();
+    $("registro-attivo").addEventListener("change", (e) => imposta(e.target.value === "1"));
+    let tocchi = 0, timerTocchi = null;
+    $("elenco-versione").addEventListener("click", () => {
+      tocchi++;
+      clearTimeout(timerTocchi);
+      timerTocchi = setTimeout(() => { tocchi = 0; }, 3000);
+      if (tocchi < 7) return;
+      tocchi = 0;
+      const visibile = $("registro-sezione").hidden;
+      mostraSezione(visibile);
+      imposta(visibile);
+      toast(visibile ? "Registro di prova acceso (solo su questo telefono)" : "Registro di prova spento e nascosto");
+    });
+    try {
+      const qs = new URLSearchParams(location.search);
+      if (qs.has("registro")) { mostraSezione(true); imposta(qs.get("registro") !== "0"); }
+    } catch (e) { /* ignora */ }
+    $("registro-cancella").addEventListener("click", () => {
+      if (!confirm("Cancellare tutto il registro?")) return;
+      righe = []; daSalvare = true; salva(); conta();
+      toast("Registro cancellato");
+    });
+    $("registro-vedi").addEventListener("click", () => {
+      const ultime = righe.slice(-80).reverse().map((r) => {
+        const [t, la, lo, acc, v, fonte, st, auto, dist, ev] = r;
+        return ora(t).slice(11) + "  " + (ev ? "▶ " + ev + "  " : "") + (v === "" ? "–" : v + " km/h") + (fonte ? " (" + fonte + ")" : "") +
+          "  " + st + "  · auto: " + (auto || "–") + (dist !== "" ? " a " + dist + " m" : "") + (acc !== "" ? "  ±" + acc + " m" : "");
+      });
+      $("registro-testo").textContent = ultime.length ? ultime.join("\n") : "Ancora nessuna riga.";
+      $("registro-vista").hidden = false;
+    });
+    $("registro-chiudi").addEventListener("click", () => { $("registro-vista").hidden = true; });
+    $("registro-condividi").addEventListener("click", async () => {
+      salva();
+      const testo = csv();
+      const nome = "registro-qui-parking-" + ora(Date.now()).replace(/[: ]/g, "-") + ".csv";
+      try {
+        const file = new File([testo], nome, { type: "text/csv" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Registro Qui-Parking" }); return; }
+      } catch (e) { if (e && e.name === "AbortError") return; }
+      try { await navigator.clipboard.writeText(testo); toast("Registro copiato: incollalo in un messaggio"); return; } catch (e) { /* ignora */ }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([testo], { type: "text/csv" })); a.download = nome; a.click();
+    });
+    return { riga, evento, acceso: () => acceso };
+  })();
+  document.addEventListener("visibilitychange", () => Registro.evento(document.hidden ? "app in secondo piano" : "app di nuovo aperta"));
+  Registro.evento("avvio app (versione " + (cfg.versione || "") + ")");
+
   Auto = (function () {
     const C = Object.assign({ guidaKmh: 20, guidaSecondi: 45, sostaSecondi: 90, sostaMetri: 40, dedottoOre: 8, dedottoMetri: 2000, liberaKmh: 10, liberaDalPostoMetri: 100, liberaSecondi: 3, liberaMetri: 3000, liberaDopoMinuti: 3 }, cfg.parcheggioAuto || {});
     const K_AUTO = "postolibero.auto.posto", K_GUIDA = "postolibero.auto.guida", K_ATTIVO = "postolibero.auto.attivo";
@@ -1246,7 +1349,8 @@
     let prima = null;                   // fix precedente, per calcolare la velocità
     let inizioGuida = null, inGuida = false, sosta = null, ultimaScrittura = 0, controllatoAvvio = false;
     let veloceDa = null, liberato = null, pausaFino = 0;
-    let ultimaV = null, ultimaVT = 0, ultimoPasso = 0;   // per il salvaschermo   // ripartenza: oltre liberaKmh il vecchio posto diventa libero
+    let ultimaV = null, ultimaVT = 0, ultimoPasso = 0;
+    let ultimoFix = null;   // per il registro di prova   // per il salvaschermo   // ripartenza: oltre liberaKmh il vecchio posto diventa libero
     const strato = L.layerGroup().addTo(mappa);
     let marker = null;
 
@@ -1264,6 +1368,8 @@
     function posizione(p) {
       const lat = p.coords.latitude, lon = p.coords.longitude, t = p.timestamp || Date.now();
       const v = velocitaKmh(p);
+      ultimoFix = { lat, lon, acc: p.coords.accuracy, v, t: Date.now(),
+        fonte: (p.coords.speed != null && p.coords.speed >= 0) ? "gps" : (v != null ? "calcolata" : "") };
       if (v != null) { ultimaV = v; ultimaVT = Date.now(); if (v >= 2 && v < 9) ultimoPasso = Date.now(); }
       if (!controllatoAvvio) { controllatoAvvio = true; deduciAllAvvio(lat, lon, t, v); }
       // Auto salvata (a mano o da sola) e ora si è a più di 100 m dall'auto e oltre i 10 km/h: il posto è stato lasciato
@@ -1293,6 +1399,24 @@
       if (!prima || t - prima.t >= 2000) prima = { lat, lon, t };
     }
 
+    // ---- registro di prova: una riga ogni 10 secondi ----
+    function datiRegistro() {
+      const ora = Date.now(), f = ultimoFix && ora - ultimoFix.t < 15000 ? ultimoFix : null;
+      let st;
+      if (!f) st = ultimoFix ? "nessun GPS da " + Math.round((ora - ultimoFix.t) / 1000) + " s" : "nessun GPS";
+      else if (inGuida && sosta) st = "fermo dopo la guida da " + Math.round((ora - sosta.t) / 1000) + " s (salva a " + C.sostaSecondi + " s)";
+      else if (inGuida) st = "in moto";
+      else if (inizioGuida != null) st = "in partenza da " + Math.round((ora - inizioGuida) / 1000) + " s (in moto a " + C.guidaSecondi + " s)";
+      else if (ora - ultimoPasso < 30000) st = "a piedi";
+      else st = "fermo";
+      if (veloceDa != null) st += " · ripartenza in corso";
+      if (!attivo) st += " · salvataggio da solo spento";
+      const auto = posto ? "parcheggiata (" + posto.modo + ")" : "nessuna";
+      const dist = posto && f ? PL.distanza(f.lat, f.lon, posto.lat, posto.lon) : null;
+      return f ? { lat: f.lat, lon: f.lon, acc: f.acc, v: f.v, fonte: f.fonte, stato: st, auto, dist } : { stato: st, auto };
+    }
+    setInterval(() => { if (Registro.acceso() && !document.hidden) Registro.riga(datiRegistro()); }, 10000);
+
     // Alla riapertura: l'app era stata chiusa mentre si guidava
     function deduciAllAvvio(lat, lon, t, v) {
       const g = leggi(K_GUIDA);
@@ -1309,6 +1433,7 @@
       precedente = posto; liberato = null; pausaFino = 0;
       posto = { lat: +lat.toFixed(6), lon: +lon.toFixed(6), t: Date.now(), modo };
       scrivi(K_AUTO, posto);
+      Registro.evento("auto salvata (" + modo + ")", datiRegistro());
       disegna();
       if (modo !== "manuale") {
         avviso(modo === "dedotto" ? "Auto lasciata qui? L'ho segnata sulla mappa" : "Parcheggio salvato", true);
@@ -1326,11 +1451,13 @@
       const daMinuti = (Date.now() - p.t) / 60000;
       if (!aMano && (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri)) {
         // sosta troppo breve (un semaforo, una coda) o auto lasciata lontano da qui: nessuna segnalazione
+        Registro.evento("ripartenza: auto tolta senza segnalare (" + (daMinuti < C.liberaDopoMinuti ? "sosta di " + daMinuti.toFixed(1) + " min" : "auto a " + Math.round(PL.distanza(p.lat, p.lon, lat, lon)) + " m") + ")", datiRegistro());
         avviso("Sei ripartito: auto tolta dalla mappa", true);
         return;
       }
       try {
         await Segnalazioni.invia(p.lat, p.lon, "libero");
+        Registro.evento((aMano ? "posto lasciato libero a mano" : "ripartenza") + ": libero inviato", datiRegistro());
         liberato = p;
         stato.miaSegnalazione = { lat: p.lat, lon: p.lon, t: Date.now() };
         stato.ultimaSegnalazione = Date.now();
@@ -1339,6 +1466,7 @@
         await caricaSegnalazioni();
         render();
       } catch (e) {
+        Registro.evento("ripartenza: libero NON inviato (rete)", datiRegistro());
         avviso("Sei ripartito: auto tolta dalla mappa (segnalazione non inviata)", true);
       }
     }
@@ -1357,6 +1485,7 @@
       }
       posto = precedente; precedente = null;
       scrivi(K_AUTO, posto);
+      Registro.evento("Annulla toccato", datiRegistro());
       disegna();
       $("avviso-auto").hidden = true;
       toast("Parcheggio annullato");
@@ -1364,6 +1493,7 @@
     function cancella() {
       precedente = posto; posto = null;
       scrivi(K_AUTO, null);
+      Registro.evento("auto tolta a mano", datiRegistro());
       mappa.closePopup();
       disegna();
       avviso("Auto tolta dalla mappa", true);
@@ -1423,6 +1553,7 @@
         precedente = posto;
         posto = { lat: +ll.lat.toFixed(6), lon: +ll.lng.toFixed(6), t: posto.t, modo: "corretto" };
         scrivi(K_AUTO, posto);
+        Registro.evento("auto spostata trascinando", datiRegistro());
         avviso("Posizione dell'auto corretta", true);
         render();
       });
