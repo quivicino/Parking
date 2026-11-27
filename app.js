@@ -928,9 +928,16 @@
     }
   }
   // "Ho lasciato libero il parcheggio": libera il posto dove era la tua auto; senza auto salvata segnala libero dove sei
-  $("btn-libero").addEventListener("click", () => { if (!Auto.liberaOra()) segnala("libero"); });
+  $("btn-libero").addEventListener("click", () => {
+    if (Auto.liberaOra()) return;
+    const z = stato.gps && Zone.dentro(stato.gps.lat, stato.gps.lon);
+    if (z) { toast("Sei a " + z + ": il posto non viene segnalato agli altri."); return; }
+    segnala("libero");
+  });
   $("btn-parcheggiato").addEventListener("click", () => {
     if (stato.gps) Auto.salva(stato.gps.lat, stato.gps.lon, "manuale");
+    const z = stato.gps && Zone.dentro(stato.gps.lat, stato.gps.lon);
+    if (z) { toast("Auto salvata. Sei a " + z + ": nessuna segnalazione agli altri."); return; }
     segnala("occupato");
   });
 
@@ -1237,6 +1244,60 @@
   // 2. Alla riapertura: se l'ultima posizione registrata era in auto (da meno di dedottoOre) e ora
   //    si è fermi o a piedi lì vicino, l'auto viene messa in quell'ultimo punto.
   // L'utente corregge solo se serve: trascina il segnaposto o usa "Sposta dove sono".
+  // ---------- Casa e Lavoro (zone private, solo su questo telefono) ----------
+  // Dentro queste zone l'auto non viene salvata da sola e il posto non viene mai segnalato agli altri
+  // (né "occupato" né "libero"), così l'indirizzo non compare. Si impostano con "Imposta qui" nell'Elenco.
+  const Zone = (function () {
+    const K = "postolibero.zone", R = (cfg.zonePrivateMetri || 150);
+    const NOMI = { casa: "Casa", lavoro: "Lavoro" };
+    const ICONE = { casa: `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5M5.5 9.8V20h13V9.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/><path d="M10 20v-5h4v5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg>`, lavoro: `<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="7.5" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 7.5V5.5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5.5v2M3 12.5h18" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>` };
+    let zone = {};
+    try { zone = JSON.parse(localStorage.getItem(K) || "{}") || {}; } catch (e) { zone = {}; }
+    const strato = L.layerGroup().addTo(mappa);
+    function salva() { try { localStorage.setItem(K, JSON.stringify(zone)); } catch (e) { /* ignora */ } }
+    function dentro(lat, lon) {
+      if (lat == null || lon == null) return null;
+      for (const k of Object.keys(zone)) if (zone[k] && PL.distanza(lat, lon, zone[k].lat, zone[k].lon) <= R) return NOMI[k];
+      return null;
+    }
+    function disegna() {
+      strato.clearLayers();
+      for (const k of Object.keys(NOMI)) {
+        const z = zone[k];
+        const riga = document.querySelector(`.zona-riga[data-zona="${k}"]`);
+        if (riga) {
+          riga.querySelector(".zona-stato").textContent = z ? "impostata" : "non impostata";
+          riga.querySelector('[data-azione="togli"]').hidden = !z;
+          riga.classList.toggle("impostata", !!z);
+        }
+        if (!z) continue;
+        L.circle([z.lat, z.lon], { radius: R, color: "#8a8aff", weight: 1, dashArray: "4 6", fillOpacity: .05, interactive: false }).addTo(strato);
+        L.marker([z.lat, z.lon], { icon: L.divIcon({ className: "", html: `<div class="mk-zona">${ICONE[k]}</div>`, iconSize: [30, 30], iconAnchor: [15, 15] }),
+          interactive: false, zIndexOffset: 400 }).addTo(strato);
+      }
+    }
+    document.querySelectorAll(".zona-riga").forEach((riga) => {
+      const k = riga.dataset.zona;
+      riga.querySelector('[data-azione="imposta"]').addEventListener("click", () => {
+        const g = stato.gps;
+        if (!g) { toast("Serve la tua posizione GPS: aspetta qualche secondo e riprova."); return; }
+        if (g.acc > 50) { toast("Posizione poco precisa (±" + Math.round(g.acc) + " m). Riprova all'aperto."); return; }
+        if (zone[k] && !confirm("Spostare " + NOMI[k] + " nella posizione attuale?")) return;
+        zone[k] = { lat: +g.lat.toFixed(5), lon: +g.lon.toFixed(5) };
+        salva(); disegna();
+        try { Registro.evento(NOMI[k] + " impostata qui"); } catch (e) { /* ignora */ }
+        toast(NOMI[k] + " impostata qui: entro " + R + " m l'auto non viene salvata e il posto non viene segnalato.");
+      });
+      riga.querySelector('[data-azione="togli"]').addEventListener("click", () => {
+        if (!confirm("Togliere " + NOMI[k] + "?")) return;
+        delete zone[k]; salva(); disegna();
+        toast(NOMI[k] + " tolta");
+      });
+    });
+    disegna();
+    return { dentro };
+  })();
+
   // ---------- Registro di prova (solo per chi lo attiva, resta sul telefono) ----------
   // Ogni 10 secondi scrive posizione, precisione, velocità e stato (in moto / sosta / parcheggiata),
   // più gli eventi (auto salvata, ripartenza, posto libero inviato, Annulla, app in secondo piano...).
@@ -1393,7 +1454,9 @@
           if (!sosta) { if (precisa) sosta = { lat, lon, t }; }
           else if (precisa && PL.distanza(sosta.lat, sosta.lon, lat, lon) > C.sostaMetri) sosta = { lat, lon, t };
           else if (t - sosta.t >= C.sostaSecondi * 1000) {
-            salva(sosta.lat, sosta.lon, "auto", sosta.t);
+            const z = Zone.dentro(sosta.lat, sosta.lon);
+            if (z) Registro.evento("arrivo a " + z + ": auto non salvata", datiRegistro());
+            else salva(sosta.lat, sosta.lon, "auto", sosta.t);
             inGuida = false; inizioGuida = null; sosta = null;
             scrivi(K_GUIDA, null);
           }
@@ -1415,6 +1478,8 @@
       else st = "fermo";
       if (veloceDa != null) st += " · ripartenza in corso";
       if (!attivo) st += " · salvataggio da solo spento";
+      const zonaQui = f && Zone.dentro(f.lat, f.lon);
+      if (zonaQui) st += " · zona " + zonaQui;
       const auto = posto ? "parcheggiata (" + posto.modo + ")" : "nessuna";
       const dist = posto && f ? PL.distanza(f.lat, f.lon, posto.lat, posto.lon) : null;
       return f ? { lat: f.lat, lon: f.lon, acc: f.acc, v: f.v, fonte: f.fonte, stato: st, auto, dist } : { stato: st, auto };
@@ -1430,7 +1495,7 @@
       const giaSalvato = posto && posto.t >= g.t;
       const vicino = PL.distanza(g.lat, g.lon, lat, lon) <= C.dedottoMetri;
       const aPiedi = v == null || v < 8;
-      if (recente && !giaSalvato && vicino && aPiedi) salva(g.lat, g.lon, "dedotto");
+      if (recente && !giaSalvato && vicino && aPiedi && !Zone.dentro(g.lat, g.lon)) salva(g.lat, g.lon, "dedotto");
     }
 
     function salva(lat, lon, modo, dal) {
@@ -1454,6 +1519,12 @@
       disegna();
       if (attivo && !aMano) { inGuida = true; inizioGuida = t; }   // si sta guidando: alla prossima sosta salva di nuovo
       const daMinuti = (Date.now() - (p.dal || p.t)) / 60000;   // v55: durata della sosta da quando l'auto si è fermata
+      const zona = Zone.dentro(p.lat, p.lon);
+      if (zona) {   // v57: a Casa o al Lavoro il posto non viene mai segnalato agli altri
+        Registro.evento((aMano ? "posto lasciato a mano" : "ripartenza") + " da " + zona + ": auto tolta, nessuna segnalazione", datiRegistro());
+        avviso(aMano ? "Auto tolta (a " + zona + " il posto non viene segnalato)" : "Sei ripartito da " + zona + ": auto tolta dalla mappa", true);
+        return;
+      }
       if (!aMano && (daMinuti < C.liberaDopoMinuti || PL.distanza(p.lat, p.lon, lat, lon) > C.liberaMetri)) {
         // sosta troppo breve (un semaforo, una coda) o auto lasciata lontano da qui: nessuna segnalazione
         Registro.evento("ripartenza: auto tolta senza segnalare (" + (daMinuti < C.liberaDopoMinuti ? "sosta di " + daMinuti.toFixed(1) + " min" : "auto a " + Math.round(PL.distanza(p.lat, p.lon, lat, lon)) + " m") + ")", datiRegistro());
@@ -1649,6 +1720,9 @@
 
     function aggiorna() {
       if (!aperto) return;
+      // dopo un po' senza tocchi torna nero (non con il foglio, il menu o un avviso aperti)
+      if ($("ss-nero").hidden && $("ss-foglio").hidden && $("menu-aiuto").hidden && $("avviso-auto").hidden &&
+          Date.now() - ultimoTocco >= NERO_DOPO) nero(true);
       $("ss-ora").textContent = oraDi(Date.now());
       const g = stato.gps, a = Auto.info();
       // "Paga la sosta" quando c'è l'auto salvata e non si sta guidando
@@ -1688,10 +1762,22 @@
       mostra({ icona: "", grande: "Nessuna auto", sotto: a.attivo ? "Quando parcheggi salvo il posto da solo" : "Tocca e usa «Ho parcheggiato» per salvare l'auto", stato: "" });
     }
 
-    function apri() {
+    // Schermo tutto nero ("salva-salvaschermo"): dopo neroDopoSecondi senza tocchi, oppure subito quando il
+    // salvaschermo si apre da solo. Un tocco sul nero mostra il salvaschermo; un tocco sul salvaschermo torna alla mappa.
+    const NERO_DOPO = ((cfg.salvaschermo && cfg.salvaschermo.neroDopoSecondi) || 30) * 1000;
+    function nero(si) {
+      $("ss-nero").hidden = !si;
+      if (!si) ultimoTocco = Date.now();
+    }
+    $("ss-nero").addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); nero(false); });
+    // un avviso ("Parcheggio salvato · Annulla", "Sei ripartito…") riaccende il salvaschermo
+    new MutationObserver(() => { if (aperto && !$("avviso-auto").hidden) nero(false); })
+      .observe($("avviso-auto"), { attributes: true, attributeFilter: ["hidden"] });
+    function apri(subitoNero) {
       if (aperto) return;
       aperto = true; angolo = null;
       el.hidden = false;
+      nero(!!subitoNero);
       schermoPerSalvaschermo = true; aggiornaSchermoAcceso();
       aggiorna();
       clearInterval(timer);
@@ -1723,7 +1809,7 @@
       // lo schermo resta acceso già prima che si apra, altrimenti il telefono si spegnerebbe prima del minuto
       const vuole = aperto || serve;
       if (vuole !== schermoPerSalvaschermo) { schermoPerSalvaschermo = vuole; aggiornaSchermoAcceso(); }
-      if (serve && Date.now() - ultimoTocco >= dopo * 1000) apri();
+      if (serve && Date.now() - ultimoTocco >= dopo * 1000) apri(true);   // aperto da solo: parte già nero
     }
     setInterval(controlla, 5000);
 
@@ -1824,6 +1910,7 @@
       if (altre) $("ss-altre").textContent = "Qui funzionano anche: " + altre.join(", ") + ". Puoi aggiungerle con «Aggiungi un'altra app».";
     }
     function apriFoglio(daSolo) {
+      if (aperto) nero(false);
       $("ss-da-solo").hidden = !daSolo;
       document.body.classList.add("foglio-aperto");
       $("ss-foglio").hidden = false;

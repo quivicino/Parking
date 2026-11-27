@@ -4,7 +4,7 @@
  */
 window.POSTOLIBERO_CONFIG = {
   // Versione dell'app, mostrata in fondo alla pagina Elenco. Aumentala a ogni aggiornamento.
-  versione: "55",
+  versione: "57",
 
   // Raggio di ricerca iniziale in metri (modificabile anche dall'app)
   raggioMetri: 1000,
@@ -42,7 +42,9 @@ window.POSTOLIBERO_CONFIG = {
   // dedottoOre: alla riapertura, se l'ultima posizione registrata era in auto da meno di queste ore
   // e ora sei a piedi lì vicino (entro dedottoMetri), l'app deduce dove hai lasciato l'auto.
   // Salvaschermo: si apre da solo dopo questi secondi senza tocchi (in guida o andando all'auto)
-  salvaschermo: { dopoSecondi: 60 },
+  salvaschermo: { dopoSecondi: 60, neroDopoSecondi: 30 },
+  // Casa e Lavoro: raggio (metri) in cui l'auto non viene salvata e il posto non viene segnalato
+  zonePrivateMetri: 150,
 
   // "Paga la sosta" (nel salvaschermo): app proposte e app ammesse sulle strisce blu per Comune.
   // android = nome del pacchetto (Play Store), ios = numero dell'app nell'App Store, web = sito.
